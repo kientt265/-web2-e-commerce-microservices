@@ -169,6 +169,28 @@ Kafka is used for real-time message streaming. The `chat-messages` topic can be 
    kafka-topics.sh --create --topic chat-messages --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1
    ```
 
+   ## Code Quality Tools
+
+   To maintain code quality and consistency, this project uses linting and formatting tools. You can run these tools using the provided `Makefile` commands.
+
+   ### Linting
+
+   Run the linter to check for code issues:
+   ```bash
+   make lint
+   ```
+   This command uses ESLint to analyze the codebase and report any style or syntax problems.
+
+   ### Formatting
+
+   Automatically format your code to match the project's style guidelines:
+   ```bash
+   make format
+   ```
+   This command uses Prettier to format your code files.
+
+   **Note:** Ensure you have the required dependencies installed by running `npm install` in the `back` directory before using these commands.
+
 ## Troubleshooting
 
 - **Error: `npm error code ENOENT` (missing package.json)**:
