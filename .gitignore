@@ -1,8 +1,9 @@
 back/node_modules/
 back/.env
 .env
+back/.venv/
 **/venv/
 venv/
 
 .env
-.env
+back/src/rasa-chatbot/.rasa/cache/

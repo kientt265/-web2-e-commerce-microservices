@@ -1,13 +1,13 @@
 # Install all dependencies
 install:
-	pip install -r back/src/chat-bot/requirements.txt
+	pip install -r back/requirements.txt
 	cd back && npm install
 
 # Python lint and format (chat-bot)
 lint-python:
-	cd back/src/chat-bot && ruff check .
+	cd back/src && ruff check .
 format-python:
-	cd back/src/chat-bot && ruff format .
+	cd back/src && ruff format .
 
 # Node.js lint (if eslint is set up)
 lint-node:
@@ -24,7 +24,7 @@ format-node:
 
 # Clean Python cache files
 clean-python:
-	find back/src/chat-bot -type d -name "__pycache__" -exec rm -r {} +
+	find back/src -type d -name "__pycache__" -exec rm -r {} +
 
 # Clean Node.js build artifacts
 clean-node:
