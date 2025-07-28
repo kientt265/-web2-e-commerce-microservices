@@ -169,7 +169,7 @@ Kafka is used for real-time message streaming. The `chat-messages` topic can be 
    kafka-topics.sh --create --topic chat-messages --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1
    ```
 
-   ## Code Quality Tools
+## Code Quality Tools
 
    To maintain code quality and consistency, this project uses linting and formatting tools. You can run these tools using the provided `Makefile` commands.
 
