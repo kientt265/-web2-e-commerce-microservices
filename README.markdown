@@ -32,20 +32,22 @@ npm --version
 
 ```
 web2-chat-app/
-├── back/                     # Chat microservice source code
+├── back/                         # Chat microservice source code
 │   ├── src/
-│   │   └── index.ts         # Main entry point for chat-service
-│   ├── package.json         # Node.js dependencies and scripts
-│   ├── tsconfig.json        # TypeScript configuration
-│   └── Dockerfile           # Dockerfile for chat-service
-├── app/                     # Chat microservice source code
-│   ├── user/
-│   │   └── index.ts         # Main entry point for user-service
-│   ├── recommend/
-│   │   └── main.py          # Main entry point for recommend-service
-├── docker-compose.yml       # Docker Compose configuration for all services
-├── .gitignore               # Git ignore file
-└── README.md                # This file
+│   │   ├── index.ts              # Main entry point for chat-service
+│   │   ├── user/                 # User-related logic (controllers, models, routes)
+│   │   ├── chatbot/              # Chatbot logic and integrations
+│   │   ├── conversation/         # Conversation management (controllers, models, routes)
+│   │   ├── message/              # Message handling (controllers, models, routes)
+│   │   ├── kafka/                # Kafka producer/consumer utilities
+│   │   ├── db/                   # Database connection and models
+│   │   └── utils/                # Utility functions and helpers
+│   ├── package.json              # Node.js dependencies and scripts
+│   ├── tsconfig.json             # TypeScript configuration
+│   └── Dockerfile                # Dockerfile for chat-service
+├── docker-compose.yml            # Docker Compose configuration for all services
+├── .gitignore                    # Git ignore file
+└── README.md                     # Project documentation
 ```
 
 ## Setup and Running the Project
