@@ -8,6 +8,11 @@ RUN npm install
 
 COPY . .
 
+RUN prisma generate
+
+RUN prisma db pull
+
+RUN prisma db push
 
 EXPOSE 3000
 
