@@ -1,10 +1,45 @@
 services:
-  chat-service:
+
+  demo:
     build:
-      context: ./back
+      context: ./back/demo
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3000:3001"
+    environment:
+      - PORT=3001
+    volumes:
+      - ./back/src/demo:/app
+    networks:
+      - chat-network  
+
+  auth-service:
+    build:
+      context: ./back/auth-service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      - PORT=3000
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=authdb
+    depends_on:
+      - postgres
+      - kafka
+    volumes:
+      - ./back/auth-service:/app
+    networks:
+      - chat-network
+
+  chat-service:
+    build:
+      context: ./back/chat-service
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3000"
     environment:
       - PORT=3000
       - POSTGRES_HOST=postgres
@@ -17,7 +52,7 @@ services:
       - postgres
       - kafka
     volumes:
-      - ./back:/app
+      - ./back/chat-service:/app
     networks:
       - chat-network
 
@@ -58,6 +93,21 @@ services:
       KAFKA_LOG_RETENTION_HOURS: 168
     ports:
       - "9092:9092"
+    networks:
+      - chat-network
+
+  api-gateway:
+    build:
+      context: ./back/gateway
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - PORT=80
+    depends_on:
+      - chat-service
+    volumes:
+      - ./back/src/gateway/conf.d:/etc/nginx/conf.d
     networks:
       - chat-network
 

@@ -6,7 +6,7 @@ const socket = io('http://localhost:3000', {
 });
 
 function Chat() {
-  type Message = { message_id: string; content: string }; // Adjust fields as needed
+  type Message = { message_id: string; content: string }; 
   const [messages, setMessages] = useState<Message[]>([]);
   const [content, setContent] = useState('');
   const [conversationId, setConversationId] = useState('YOUR_CONVERSATION_ID');
