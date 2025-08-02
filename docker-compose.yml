@@ -117,7 +117,7 @@ services:
       - auth-service
       - chat-service
     volumes:
-      - ./back/src/gateway/conf.d:/etc/nginx/conf.d
+      - ./back/gateway/conf.d:/etc/nginx/conf.d
     networks:
       - app-network
 

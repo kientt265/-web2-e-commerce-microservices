@@ -12,7 +12,7 @@ model conversations {
   type            conversation_type
   name            String?              @db.VarChar(100)
   created_at      DateTime?            @default(now()) @db.Timestamp(6)
-  members         conversation_members[]
+  members         conversation_members[] @relation("ConversationMembers")
   messages        messages[]
 }
 
@@ -20,6 +20,7 @@ model conversation_members {
   conversation_id String    @db.Uuid
   user_id         String    @db.Uuid
   joined_at       DateTime? @default(now()) @db.Timestamp(6)
+  conversation    conversations @relation("ConversationMembers", fields: [conversation_id], references: [conversation_id], onDelete: Cascade, onUpdate: NoAction)
   @@id([conversation_id, user_id])
 }
 
