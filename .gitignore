@@ -7,3 +7,7 @@ venv/
 
 .env
 back/src/rasa-chatbot/.rasa/cache/
+back/src/rasa-chatbot/.venv/
+back/src/demo/.venv/
+
+back/src/demo/__pycache__/

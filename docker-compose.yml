@@ -1,4 +1,18 @@
 services:
+
+  demo:
+    build:
+      context: ./back/src/demo
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3001"
+    environment:
+      - PORT=3001
+    volumes:
+      - ./back/src/demo:/app
+    networks:
+      - chat-network  
+
   chat-service:
     build:
       context: ./back
@@ -58,6 +72,21 @@ services:
       KAFKA_LOG_RETENTION_HOURS: 168
     ports:
       - "9092:9092"
+    networks:
+      - chat-network
+
+  api-gateway:
+    build:
+      context: ./back/src/gateway
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - PORT=80
+    depends_on:
+      - chat-service
+    volumes:
+      - ./back/src/gateway/conf.d:/etc/nginx/conf.d
     networks:
       - chat-network
 
