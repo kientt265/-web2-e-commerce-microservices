@@ -1,6 +1,6 @@
 # Install all dependencies
 install:
-	pip install -r back/src/agent/requirements.txt
+	make python-install
 	cd back && npm install
 
 # Add python environment
