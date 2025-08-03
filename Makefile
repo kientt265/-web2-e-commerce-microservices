@@ -1,8 +1,15 @@
 # Install all dependencies
 install:
-	pip install -r back/requirements.txt
+	pip install -r back/src/agent/requirements.txt
 	cd back && npm install
 
+# Add python environment
+python-install:
+	cd back/src/agent && \
+	python3 -m venv .venv && \
+	source .venv/bin/activate && \
+	pip install -r requirements.txt
+	
 # Python lint and format (chat-bot)
 lint-python:
 	cd back/src && ruff check .
