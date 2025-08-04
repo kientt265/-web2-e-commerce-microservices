@@ -1,12 +1,14 @@
 back/node_modules/
 back/.env
 .env
+back/.venv/
 **/venv/
 venv/
 
 .env
-back/src/rasa-chatbot/.rasa/cache/
-back/src/rasa-chatbot/.venv/
-back/src/demo/.venv/
+
+**/__pycache__/
+**/agent/__pycache__/   
+**/.venv/
 
 back/src/demo/__pycache__/

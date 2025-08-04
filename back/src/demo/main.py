@@ -3,10 +3,12 @@ from pydantic import BaseModel
 
 app = FastAPI(title="Demo Microservice")
 
+
 class Item(BaseModel):
     id: int
     name: str
     description: str = None
+
 
 # In-memory "database"
 items = {
@@ -15,10 +17,12 @@ items = {
     3: Item(id=3, name="Item Three", description="This is the third item"),
 }
 
+
 @app.post("/items/", response_model=Item)
 def create_item(item: Item):
     items[item.id] = item
     return item
+
 
 @app.get("/items/{item_id}", response_model=Item)
 def read_item(item_id: int):
@@ -26,6 +30,7 @@ def read_item(item_id: int):
     if not item:
         return {"error": "Item not found"}
     return item
+
 
 @app.get("/health")
 def health_check():

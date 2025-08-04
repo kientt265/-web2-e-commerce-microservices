@@ -1,0 +1,23 @@
+import uvicorn
+from fastapi import FastAPI
+from api.v1.endpoints import router as router_v1
+
+app = FastAPI(
+    title="Agent API Service",
+    description="API for agent-based microservice. See /docs for Swagger UI.",
+    version="1.0.0",
+    contact={"name": "KieZu Team", "email": "your@email.com"},
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
+
+
+@app.get("/", tags=["info"])
+def root():
+    return {"message": "Welcome to the Agent API Service. See /docs for Swagger UI."}
+
+
+app.include_router(router_v1, prefix="/api/v1", tags=["agent"])
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=3002)
