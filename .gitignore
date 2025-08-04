@@ -7,7 +7,8 @@ venv/
 
 .env
 
-back/src/agent/__pycache__/
-back/src/demo/.venv/
+**/__pycache__/
+**/agent/__pycache__/   
+**/.venv/
 
 back/src/demo/__pycache__/

@@ -1,15 +1,20 @@
 import os
+from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
-from ..prompts.conversation_prompts import AGENT_PROMPT
+from prompts.conversation_prompts import AGENT_PROMPT
+
+load_dotenv()
+
 
 class ConversationAgent:
     """
     Manages conversational state, context, and generates responses.
     """
+
     def __init__(self, memory=None):
+        self.google_api_key = os.getenv("GOOGLE_API_KEY")
         self.llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
         self.memory = memory or []
-        self.google_api_key = os.getenv("GOOGLE_API_KEY")
 
     def add_to_memory(self, message):
         self.memory.append(message)
@@ -20,8 +25,8 @@ class ConversationAgent:
     def _get_message(self, input_message):
         messages = [
             (
-            "system",
-            AGENT_PROMPT,
+                "system",
+                AGENT_PROMPT,
             ),
             ("human", input_message),
         ]
@@ -37,5 +42,6 @@ class ConversationAgent:
         # Add response to memory
         self.add_to_memory({"role": "assistant", "content": response.content})
         return response.content
+
 
 conversation_agent = ConversationAgent()

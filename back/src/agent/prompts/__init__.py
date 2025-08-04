@@ -1,4 +1,4 @@
-from conversation_prompts import AGENT_PROMPT
+from prompts.conversation_prompts import AGENT_PROMPT
 
 if "__name__" == "__main__":
     print("This is the prompts package for the agent module.")
