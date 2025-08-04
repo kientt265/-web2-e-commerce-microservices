@@ -1,24 +1,33 @@
 # Chat Application
 
-This is a real-time chat application built using a microservice architecture with Node.js, TypeScript, Kafka, Zookeeper, and PostgreSQL. The application uses Docker to manage services, ensuring easy setup and scalability.
+This is a real-time chat application built using a microservice architecture with Node.js, TypeScript, Kafka, Zookeeper, PostgreSQL, and an integrated AI agent service. The application uses Docker to manage services, ensuring easy setup and scalability. The AI agent enables multiple automated tasks, such as conversation assistance, tool invocation, and intelligent message handling.
 
 ## Project Overview
 
-The application consists of a single microservice (`chat-service`) that handles chat functionality, integrated with Kafka for message streaming and PostgreSQL for persistent storage. Zookeeper is used to manage Kafka's metadata.
+
+The application consists of:
+- A chat microservice (`chat-service`) that handles chat functionality, integrated with Kafka for message streaming and PostgreSQL for persistent storage.
+- An AI agent microservice that provides intelligent automation for multiple tasks, such as conversation management, tool calling, and message processing.
+Zookeeper is used to manage Kafka's metadata.
+
 
 ### Services
 - **chat-service**: A Node.js/Express microservice for handling chat logic, built with TypeScript.
+- **agent-service**: A Python FastAPI microservice powered by LangChain, providing AI agent capabilities for multiple tasks (conversation, tool invocation, automation).
 - **postgres**: PostgreSQL database for storing users, conversations, and messages.
 - **kafka**: Kafka message broker for real-time message streaming.
 - **zookeeper**: Manages Kafka's metadata and coordination.
 
 ## Prerequisites
 
+
 To run this project, ensure you have the following installed:
 - **Docker**: Version 20.10 or later.
 - **Docker Compose**: Version 2.0 or later.
 - **Node.js**: Version 18 (only needed if you want to run the project without Docker for development).
 - **npm**: Version 8 or later (for local development).
+- **Python**: Version 3.10 or later (required for agent-service).
+- **LangChain**: Python library for building AI agents (required for agent-service).
 
 Verify installation:
 ```bash
@@ -37,7 +46,7 @@ web2-chat-app/
 │   │   ├── index.ts              # Main entry point for chat-service
 │   │   ├── user/                 # User-related logic (controllers, models, routes)
 │   │   ├── chatbot/              # Chatbot logic and integrations
-│   │   ├── conversation/         # Conversation management (controllers, models, routes)
+│   │   ├── agent/                # Agent management and logic (controllers, models, routes)
 │   │   ├── message/              # Message handling (controllers, models, routes)
 │   │   ├── kafka/                # Kafka producer/consumer utilities
 │   │   ├── db/                   # Database connection and models
