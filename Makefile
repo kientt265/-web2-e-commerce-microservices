@@ -12,9 +12,14 @@ python-install:
 	
 # Python lint and format (chat-bot)
 lint-python:
-	cd back/src && ruff check .
+	cd back/src/agent && \
+	source .venv/bin/activate && \
+	ruff check . && \
+	pylint .
 format-python:
-	cd back/src && ruff format .
+	cd back/src/agent && \
+	source .venv/bin/activate && \
+	ruff format .
 
 # Node.js lint (if eslint is set up)
 lint-node:
