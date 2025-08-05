@@ -1,3 +1,10 @@
+"""
+Main entry point for the Agent API Service.
+
+This module sets up a FastAPI application that provides AI agent capabilities
+for conversation management, tool calling, and message processing using LangChain.
+"""
+
 import uvicorn
 from fastapi import FastAPI
 from api.v1.endpoints import router as router_v1
@@ -14,6 +21,7 @@ app = FastAPI(
 
 @app.get("/", tags=["info"])
 def root():
+    """Root endpoint that provides basic information about the Agent API Service."""
     return {"message": "Welcome to the Agent API Service. See /docs for Swagger UI."}
 
 

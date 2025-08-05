@@ -1,12 +1,19 @@
-from langchain.tools import Tool
+"""
+Agent Manager module for managing AI agent lifecycle and interactions.
+
+This module provides the AgentManager class which handles the creation,
+management, and message processing for AI agents using LangChain and LangGraph.
+"""
+
 from typing import Dict
-from langgraph.graph.state import CompiledStateGraph
+
+from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
+from langchain.tools import Tool
+from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import create_react_agent
 
 # Load environment variables
-from dotenv import load_dotenv
-
 load_dotenv()
 
 
@@ -65,6 +72,12 @@ class AgentManager:
         agent = self._get_or_create_agent(session_id)
         response = agent.invoke({"messages": [{"role": "user", "content": user_input}]})
         return response
+
+    def get_agent_count(self) -> int:
+        """Returns the number of active agents.
+        :return: Number of active agent sessions.
+        """
+        return len(self.agents)
 
 
 agent_manager = AgentManager()

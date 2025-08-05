@@ -1,6 +1,10 @@
-from prompts.conversation_prompts import AGENT_PROMPT
+"""
+Prompts package for the agent module.
 
-if "__name__" == "__main__":
-    print("This is the prompts package for the agent module.")
-else:
-    __all__ = ["AGENT_PROMPT"]
+This package contains conversation prompts and templates used by AI agents
+for generating responses and managing conversations.
+"""
+
+from .conversation_prompts import AGENT_PROMPT
+
+__all__ = ["AGENT_PROMPT"]
