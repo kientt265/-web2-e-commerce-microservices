@@ -1,12 +1,14 @@
 from langchain.tools import Tool
-from typing import Any, Dict
+from typing import Dict
 from langgraph.graph.state import CompiledStateGraph
 from langchain.chat_models import init_chat_model
 from langgraph.prebuilt import create_react_agent
 
 # Load environment variables
 from dotenv import load_dotenv
+
 load_dotenv()
+
 
 def echo_tool(text: str) -> str:
     """A simple echo tool for testing."""
@@ -16,6 +18,7 @@ def echo_tool(text: str) -> str:
 echo = Tool(
     name="Echo", func=echo_tool, description="Echoes the input text back to the user."
 )
+
 
 class AgentManager:
     """
@@ -28,13 +31,11 @@ class AgentManager:
         :param tools: List of tools to be used by the agents.
         """
         self.tools = [echo]
-        self.model = init_chat_model(
-            "google_genai:gemini-2.5-flash"
-        )
+        self.model = init_chat_model("google_genai:gemini-2.5-flash")
         self.agents: Dict[str, CompiledStateGraph] = {}
 
     def _create_agent(self, session_id: str) -> CompiledStateGraph:
-        """ Creates a new agent for the given session ID.
+        """Creates a new agent for the given session ID.
         :param session_id: Unique identifier for the session.
         :return: An instance of CompiledStateGraph.
         """
