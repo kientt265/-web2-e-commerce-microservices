@@ -17,6 +17,7 @@ services:
     build:
       context: ./back/auth-service
       dockerfile: Dockerfile
+    env_file: ./back/auth-service/.env
     ports:
       - "3001:3001"
     environment:
@@ -33,6 +34,7 @@ services:
     build:
       context: ./back/chat-service
       dockerfile: Dockerfile
+    env_file: ./back/chat-service/.env
     ports:
       - "3002:3002"
     environment:

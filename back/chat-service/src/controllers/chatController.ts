@@ -12,7 +12,7 @@ export const getMessages = async (req: Request, res: Response) => {
       where: { conversation_id },
       orderBy: { sent_at: 'asc' },
       include: {
-        sender: { select: { user_id: true, username: true } },
+        // sender: { select: { user_id: true, username: true } }, // Removed because 'sender' relation does not exist
       },
     });
     res.status(200).json(messages);
@@ -22,9 +22,9 @@ export const getMessages = async (req: Request, res: Response) => {
   }
 };
 
-// Tạo cuộc trò chuyện mới
+
 export const createConversation = async (req: Request, res: Response) => {
-  const { type, name, user_ids } = req.body; // user_ids: danh sách user_id tham gia
+  const { type, name, user_ids } = req.body; 
 
   try {
     const conversation = await prisma.conversations.create({
@@ -51,7 +51,6 @@ export const sendMessage = async (req: Request, res: Response) => {
   const { conversation_id, sender_id, content } = req.body;
 
   try {
-    // Kiểm tra xem người dùng có trong cuộc trò chuyện không
     const member = await prisma.conversation_members.findFirst({
       where: {
         conversation_id,
@@ -69,14 +68,6 @@ export const sendMessage = async (req: Request, res: Response) => {
         sender_id,
         content,
         sent_at: new Date(),
-      },
-      include: {
-        sender: {
-          select: {
-            user_id: true,
-            username: true
-          }
-        }
       }
     });
 

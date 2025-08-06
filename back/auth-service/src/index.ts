@@ -10,8 +10,8 @@ const app = express();
 const port = process.env.AUTH_PORT || 3001;
 
 app.use(express.json());
-app.use('/api/auth', authRoutes);
-app.get('/', (req, res) => {
+app.use('/', authRoutes);
+app.get('/run', (req, res) => {
   res.send('Auth Service is running');
 });
 
