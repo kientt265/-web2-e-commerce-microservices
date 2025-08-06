@@ -21,5 +21,16 @@ export const userService = {
     api.post('/auth/login', data).then((res) => res.data),
     register: (data: { username: string; email: string; password: string }) =>
     api.post('/auth/register', data).then((res) => res.data),
-
 }
+
+export const chatService = {
+  getMessages: (conversationId: string) =>
+    api.get(`/chat/messages/${conversationId}`).then((res) => res.data),
+  createConversation: (data: { userIds: string[] }) =>
+    api.post('/chat/conversation', data).then((res) => res.data),
+  sendMessage: (data: { conversationId: string; content: string }) =>
+    api.post('/chat/messages', data).then((res) => res.data),
+  getAllConversations: () =>
+    api.get('/chat/conversations').then((res) => res.data),
+}
+

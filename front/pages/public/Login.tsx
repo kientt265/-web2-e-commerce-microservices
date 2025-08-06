@@ -36,14 +36,13 @@ function Login() {
             const response = await userService.login(loginData);
             setAuth({ token: response.token, user: response.user });
             console.log('Login successful:', response.username);
+            navigate('/Chat');
         } catch (err: any) {
             setError(err.response?.data?.message || 'Login failed. Please try again.');
         } finally {
             setLoading(false);
         }
     }
-
-
     return (
         <div>
             <form onSubmit={handleSumit} className='flex flex-col gap-2 justify-center items-center h-screen '>
