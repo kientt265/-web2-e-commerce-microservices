@@ -1,5 +1,6 @@
 import express from 'express';
 import { config } from 'dotenv';
+import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 import authRoutes from './routes/authRoutes';
 
@@ -9,6 +10,7 @@ const prisma = new PrismaClient();
 const app = express();
 const port = process.env.AUTH_PORT || 3001;
 
+app.use(cors());
 app.use(express.json());
 app.use('/', authRoutes);
 app.get('/run', (req, res) => {
