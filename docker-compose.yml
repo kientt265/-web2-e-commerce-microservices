@@ -1,18 +1,4 @@
 services:
-
-  demo:
-    build:
-      context: ./back/src/demo
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3001"
-    environment:
-      - PORT=3001
-    volumes:
-      - ./back/src/demo:/app
-    networks:
-      - chat-network  
-
   chat-service:
     build:
       context: ./back
