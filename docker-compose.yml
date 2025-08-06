@@ -123,6 +123,21 @@ services:
     networks:
       - app-network
 
+  api-gateway:
+    build:
+      context: ./back/src/gateway
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - PORT=80
+    depends_on:
+      - chat-service
+    volumes:
+      - ./back/src/gateway/conf.d:/etc/nginx/conf.d
+    networks:
+      - chat-network
+
 volumes:
   auth-db-data:
   chat-db-data:

@@ -4,8 +4,13 @@ back/.env
 back/auth-service/.env
 back/chat-service/.env
 .env
+back/.venv/
 **/venv/
 venv/
 
 .env
-.env
+
+**/__pycache__/
+**/.venv/
+
+back/src/demo/__pycache__/
