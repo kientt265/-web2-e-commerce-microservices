@@ -77,3 +77,50 @@ export const sendMessage = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to send message' });
   }
 };
+
+export const getAllConversations = async (req: Request, res: Response) => {
+  try {
+    const user_id = req.user?.user_id;
+
+    if (!user_id) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
+    const conversations = await prisma.conversations.findMany({
+      where: {
+        members: {
+          some: {
+            user_id: user_id
+          }
+        }
+      },
+      include: {
+        members: true,
+        messages: {
+          orderBy: {
+            sent_at: 'desc'
+          },
+          take: 1,
+        }
+      },
+      orderBy: {
+        created_at: 'desc'
+      }
+    });
+
+    const formattedConversations = conversations.map(conv => ({
+      conversation_id: conv.conversation_id,
+      type: conv.type,
+      name: conv.name,
+      created_at: conv.created_at,
+      member_count: conv.members.length,
+      members: conv.members,
+      last_message: conv.messages[0] || null
+    }));
+
+    res.status(200).json(formattedConversations);
+  } catch (error) {
+    console.error('Error fetching conversations:', error);
+    res.status(500).json({ error: 'Failed to fetch conversations' });
+  }
+};

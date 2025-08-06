@@ -20,6 +20,12 @@ export const handleSocketConnection = (io: Server) => {
                 if (!data.conversation_id || !data.sender_id || !data.content) {
                     throw new Error('Missing required fields');
                 }
+                const isMember = await prisma.conversation_members.findFirst({
+                    where: { conversation_id: data.conversation_id, user_id: data.sender_id },
+                    });
+                    if (!isMember) {
+                    throw new Error('Sender is not a member of this conversation');
+                }
 
                 const conversation = await prisma.conversations.findUnique({
                     where: { conversation_id: data.conversation_id },
@@ -33,6 +39,7 @@ export const handleSocketConnection = (io: Server) => {
                     message_id: randomUUID(),
                     ...data,
                     sent_at: new Date().toISOString(),
+                    is_read: false
                 };
 
                 const topic = conversation?.type === 'group' ? 'group-chat-messages' : 'private-chat-messages';
@@ -40,6 +47,12 @@ export const handleSocketConnection = (io: Server) => {
                     topic,
                     messages: [{ value: JSON.stringify(message) }],
                 });
+
+                // Emit to sender
+                socket.emit('message_sent', { success: true, message });
+                
+                // Emit to all users in the conversation
+                io.to(data.conversation_id).emit('new_message', message);
 
                 console.log('Message sent to Kafka:', message);
             } catch (error) {
