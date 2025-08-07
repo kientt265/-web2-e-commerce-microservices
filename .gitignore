@@ -1,5 +1,8 @@
-back/node_modules/
+back/auth-service/node_modules/
+back/chat-service/node_modules/
 back/.env
+back/auth-service/.env
+back/chat-service/.env
 .env
 back/.venv/
 **/venv/
