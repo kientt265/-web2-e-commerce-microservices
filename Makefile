@@ -5,7 +5,7 @@ install:
 
 # Add python environment
 python-install:
-	cd back/src/agent && \
+	cd back/agent && \
 	python3 -m venv .venv && \
 	source .venv/bin/activate && \
 	pip install -r requirements.txt
