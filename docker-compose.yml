@@ -1,35 +1,4 @@
 services:
-
-  demo:
-    build:
-      context: ./back/demo
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    environment:
-      - PORT=3000
-    volumes:
-      - ./back/src/demo:/app
-    networks:
-      - app-network 
-
-  auth-service:
-    build:
-      context: ./back/auth-service
-      dockerfile: Dockerfile
-    env_file: ./back/auth-service/.env
-    ports:
-      - "3001:3001"
-    environment:
-      - AUTH_PORT=3001
-      - AUTH_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@auth-db:5432/auth_db?schema=public
-    depends_on:
-      - auth-db
-    volumes:
-      - ./back/auth-service:/app
-    networks:
-      - app-network
-
   chat-service:
     build:
       context: ./back/chat-service
