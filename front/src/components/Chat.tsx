@@ -12,11 +12,11 @@ function Chat() {
   const [content, setContent] = useState('');
   const socketRef = React.useRef<any>(null);
   const location = useLocation();
-  const userId = location.state;
+  const userId1 = location.state;
+  const userId = userId1.user_id;
 
 
   useEffect(() => {
-    // Fetch conversations
     const fetchConversations = async () => {
       try {
         const data = await chatService.getAllConversations();
@@ -28,56 +28,56 @@ function Chat() {
     fetchConversations();
   }, []);
 
+  // Kết hợp messages từ API và real-time
+  
+
+  // Load tin nhắn cũ khi chọn conversation
+  const handleGetMessages = async (conversationId: string) => {
+    try {
+      console.log('[Chat] 📥 Fetching message history...');
+      const historicalMessages = await chatService.getMessages(conversationId);
+      setMessages(historicalMessages);
+      console.log(`[Chat] ✅ Loaded ${historicalMessages.length} historical messages`);
+    } catch (error) {
+      console.error('[Chat] ❌ Failed to fetch messages:', error);
+    }
+  };
+
+  // Socket effect để handle real-time messages
   useEffect(() => {
     if (!activeConversation) return;
 
-    console.log('[Socket] 🔄 Attempting to connect to socket server...');
-    
-  const socket = io('http://localhost', {
+    const socket = io('http://localhost:3002', {
       path: '/socket.io',
       transports: ['websocket'],
-      auth: { token: 'your-secret-key' },
+      auth: {token: 'your-secret-key'},
     });
     
     socketRef.current = socket;
 
-    // Connection event handlers
     socket.on('connect', () => {
-        console.log('[Socket] ✅ Connected successfully | Socket ID:', socket.id);
-        socket.emit('join_conversation', activeConversation.conversation_id);
+      console.log('[Socket] ✅ Connected successfully');
+      socket.emit('join_conversation', activeConversation.conversation_id);
     });
 
-    socket.on('connect_error', (error) => {
-        console.error('[Socket] ❌ Connection failed:', error.message);
-    });
-
-    socket.on('disconnect', (reason) => {
-        console.log('[Socket] 🔌 Disconnected:', reason);
-    });
-
-
-    socket.on('message_sent', ({ success, message }) => {
-        console.log('[Socket] 📤 Message sent status:', success, message);
-        if (success) {
-            setMessages((prev) => [...prev, message]);
-        }
-    });
-
+    // Listen for new messages
     socket.on('new_message', (message: Message) => {
-        console.log('[Socket] 📩 New message received:', message);
-        setMessages((prev) => [...prev, message]);
+      console.log('[Socket] 📩 Real-time message received:', message);
+      setMessages(prev => {
+        // Kiểm tra xem tin nhắn đã tồn tại chưa
+        const messageExists = prev.some(msg => msg.message_id === message.message_id);
+        if (messageExists) {
+          console.log('[Chat] ⚠️ Duplicate message detected:', message.message_id);
+          return prev;
+        }
+        return [...prev, message];
+      });
     });
 
-  
-
+    // Cleanup
     return () => {
-        console.log('[Socket] 👋 Cleaning up socket connection...');
-        socket.off('connect');
-        socket.off('connect_error');
-        socket.off('message_sent');
-        socket.off('new_message');
-        socket.off('error');
-        socket.disconnect();
+      socket.disconnect();
+      setMessages([]); // Clear messages when changing conversation
     };
   }, [activeConversation]);
 
@@ -93,14 +93,20 @@ function Chat() {
     }
 
     const newMessage = {
-        conversation_id: activeConversation.conversation_id, // Should be a valid UUID from database
-        sender_id: userId, // Should be a valid UUID from authentication
+        conversation_id: activeConversation.conversation_id, 
+        sender_id: userId, 
         content: content.trim(),
     };
 
     console.log('[Chat] 📤 Attempting to send message:', newMessage);
     socketRef.current.emit('send_message', newMessage);
     setContent('');
+  };
+
+  // Click handler cho conversation
+  const handleConversationClick = async (conv: Conversation) => {
+    setActiveConversation(conv);
+    await handleGetMessages(conv.conversation_id); // Load historical messages
   };
 
   return (
@@ -119,7 +125,10 @@ function Chat() {
                   ? 'bg-gray-200'
                   : ''
               }`}
-              onClick={() => setActiveConversation(conv)}
+              onClick={() => {
+                setActiveConversation(conv);
+                handleGetMessages(conv.conversation_id);
+              }}
             >
               <h3 className="font-semibold">{conv.name}</h3>
               <p className="text-sm text-gray-500 truncate">
@@ -150,12 +159,17 @@ function Chat() {
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4">
               {messages.map((msg) => (
-                <div key={msg.message_id} className="mb-4">
-                  <div className="bg-blue-100 rounded-lg p-3 inline-block">
-                    {msg.content}
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    {new Date(msg.sent_at).toLocaleTimeString()}
+                <div 
+                  key={`${msg.message_id}-${msg.sent_at}`}
+                  className={`mb-4 flex ${msg.sender_id === userId ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`rounded-lg p-3 max-w-[70%] ${
+                    msg.sender_id === userId ? 'bg-blue-500 text-white' : 'bg-gray-100'
+                  }`}>
+                    <div className="text-sm">{msg.content}</div>
+                    <div className="text-xs opacity-75 mt-1">
+                      {new Date(msg.sent_at).toLocaleTimeString()}
+                    </div>
                   </div>
                 </div>
               ))}

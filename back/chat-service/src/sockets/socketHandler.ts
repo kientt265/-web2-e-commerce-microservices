@@ -15,15 +15,15 @@ export const handleSocketConnection = (io: Server) => {
                 const userId = socket.handshake.auth.token; // Assuming token is user ID
                 console.log(`[Socket] 🚪 User ${socket.id} attempting to join conversation ${conversationId}`);
                 
-                const isMember = await prisma.conversation_members.findFirst({
-                    where: { conversation_id: conversationId, user_id: userId },
-                });
+                // const isMember = await prisma.conversation_members.findFirst({
+                //     where: { conversation_id: conversationId, user_id: userId },
+                // });
 
-                if (!isMember) {
-                    console.warn(`[Socket] ⚠️ User ${socket.id} not authorized for conversation ${conversationId}`);
-                    socket.emit('error', { message: 'Not authorized to join this conversation' });
-                    return;
-                }
+                // if (!isMember) {
+                //     console.warn(`[Socket] ⚠️ User ${socket.id} not authorized for conversation ${conversationId}`);
+                //     socket.emit('error', { message: 'Not authorized to join this conversation' });
+                //     return;
+                // }
 
                 socket.join(conversationId);
                 console.log(`[Socket] ✅ User ${socket.id} joined conversation ${conversationId}`);
