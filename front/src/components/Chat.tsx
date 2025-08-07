@@ -2,14 +2,18 @@ import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import { chatService } from '../../services/api.ts';
 import type { Conversation, Message } from '../../types/index.ts';
+import { useLocation } from 'react-router-dom';
+
 
 function Chat() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [content, setContent] = useState('');
-  const [userId, setUserId] = useState('user1');
   const socketRef = React.useRef<any>(null);
+  const location = useLocation();
+  const userId = location.state;
+
 
   useEffect(() => {
     // Fetch conversations
@@ -27,54 +31,76 @@ function Chat() {
   useEffect(() => {
     if (!activeConversation) return;
 
-    const socket = io('http://localhost/socket.io', {
+    console.log('[Socket] 🔄 Attempting to connect to socket server...');
+    
+  const socket = io('http://localhost', {
       path: '/socket.io',
       transports: ['websocket'],
       auth: { token: 'your-secret-key' },
     });
+    
     socketRef.current = socket;
-    socket.emit('join_conversation', activeConversation.conversation_id);
 
-    // Thêm listener cho message_sent
+    // Connection event handlers
+    socket.on('connect', () => {
+        console.log('[Socket] ✅ Connected successfully | Socket ID:', socket.id);
+        socket.emit('join_conversation', activeConversation.conversation_id);
+    });
+
+    socket.on('connect_error', (error) => {
+        console.error('[Socket] ❌ Connection failed:', error.message);
+    });
+
+    socket.on('disconnect', (reason) => {
+        console.log('[Socket] 🔌 Disconnected:', reason);
+    });
+
+
     socket.on('message_sent', ({ success, message }) => {
-      if (success) {
-        setMessages((prev) => [...prev, message]);
-      }
+        console.log('[Socket] 📤 Message sent status:', success, message);
+        if (success) {
+            setMessages((prev) => [...prev, message]);
+        }
     });
 
     socket.on('new_message', (message: Message) => {
-      setMessages((prev) => [...prev, message]);
+        console.log('[Socket] 📩 New message received:', message);
+        setMessages((prev) => [...prev, message]);
     });
 
+  
+
     return () => {
-      socket.off('message_sent');
-      socket.off('new_message');
-      socket.disconnect();
+        console.log('[Socket] 👋 Cleaning up socket connection...');
+        socket.off('connect');
+        socket.off('connect_error');
+        socket.off('message_sent');
+        socket.off('new_message');
+        socket.off('error');
+        socket.disconnect();
     };
   }, [activeConversation]);
 
-  // Cập nhật hàm sendMessage
   const sendMessage = () => {
-    if (!socketRef.current || !activeConversation || !content.trim() || !userId) return;
+    if (!socketRef.current || !activeConversation || !content.trim() || !userId) {
+        console.warn('[Chat] ⚠️ Cannot send message: Missing required data', {
+            socketConnected: !!socketRef.current,
+            hasActiveConversation: !!activeConversation,
+            hasContent: !!content.trim(),
+            hasUserId: !!userId
+        });
+        return;
+    }
 
     const newMessage = {
-      conversation_id: activeConversation.conversation_id,
-      sender_id: userId,
-      content,
+        conversation_id: activeConversation.conversation_id, // Should be a valid UUID from database
+        sender_id: userId, // Should be a valid UUID from authentication
+        content: content.trim(),
     };
 
+    console.log('[Chat] 📤 Attempting to send message:', newMessage);
     socketRef.current.emit('send_message', newMessage);
-
-    // Thêm tin nhắn tạm thời vào UI
-    const tempMessage: Message = {
-      message_id: 'temp-' + Date.now(),
-      ...newMessage,
-      sent_at: new Date().toISOString(),
-      is_read: false,
-    };
-    setMessages((prev) => [...prev, tempMessage]);
     setContent('');
-    console.log('Send message susscessfully');
   };
 
   return (

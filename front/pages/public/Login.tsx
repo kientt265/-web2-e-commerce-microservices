@@ -3,17 +3,15 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import { authAtom } from '../../context/auth';
+import type { User } from '../../types/index.ts';
 
-interface UserForm {
-    email: string;
-    password: string;
-    role: 'user' | 'admin';
-}
+
 function Login() {
-    const [formData, setFormData] = useState<UserForm>({
+    const [formData, setFormData] = useState<User>({
+        id: '',
         email: '',
-        password: '',
-        role: 'user',
+        username: '',
+        password: ''
     });
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -34,9 +32,13 @@ function Login() {
                 password: formData.password
             };
             const response = await userService.login(loginData);
+            setFormData({id: response.user_id, ...formData});
             setAuth({ token: response.token, user: response.user });
             console.log('Login successful:', response.username);
-            navigate('/Chat');
+            console.log('User ID:', response.user_id);
+            navigate('/Chat', {
+                state: {user_id: response.user_id}
+            });
         } catch (err: any) {
             setError(err.response?.data?.message || 'Login failed. Please try again.');
         } finally {

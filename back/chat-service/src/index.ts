@@ -40,14 +40,41 @@ app.get('/run', (req, res) => {
 });
 
 server.listen(port, async () => {
-  console.log(`Chat Service is running on port ${port}`);
-  await initKafka(io);
+    console.log('\n=== Chat Service Status ===');
+    console.log(`[Server] 🚀 HTTP Server running on port ${port}`);
+    console.log(`[Socket] 🔌 Socket.IO server initialized`);
+    console.log(`[CORS] ✅ CORS configured for origin: http://localhost:5173`);
+    
+    try {
+        await initKafka(io);
+        console.log('[Service] ✅ Chat service fully initialized\n');
+    } catch (error) {
+        console.error('[Service] ❌ Failed to initialize Kafka:', error);
+        process.exit(1);
+    }
 });
 
 process.on('SIGTERM', async () => {
-  console.log('Shutting down Chat Service...');
-  await producer.disconnect();
-  await consumer.disconnect();
-  await prisma.$disconnect();
-  server.close(() => process.exit(0));
+    console.log('\n=== Shutting down Chat Service ===');
+    console.log('[Service] 🛑 Received SIGTERM signal');
+    
+    try {
+        await producer.disconnect();
+        console.log('[Kafka] ✅ Producer disconnected');
+        
+        await consumer.disconnect();
+        console.log('[Kafka] ✅ Consumer disconnected');
+        
+        await prisma.$disconnect();
+        console.log('[Database] ✅ Database connection closed');
+        
+        server.close(() => {
+            console.log('[Server] ✅ HTTP Server closed');
+            console.log('[Service] 👋 Goodbye!\n');
+            process.exit(0);
+        });
+    } catch (error) {
+        console.error('[Service] ❌ Error during shutdown:', error);
+        process.exit(1);
+    }
 });
