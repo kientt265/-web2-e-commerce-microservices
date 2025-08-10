@@ -1,9 +1,24 @@
 services:
+  auth-service:
+    build:
+      context: ./back/auth-service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - AUTH_PORT=3001
+      - AUTH_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@auth-db:5432/auth_db?schema=public
+    depends_on:
+      - auth-db
+    volumes:
+      - ./back/auth-service:/app
+    networks:
+      - app-network
+
   chat-service:
     build:
       context: ./back/chat-service
       dockerfile: Dockerfile
-    env_file: ./back/chat-service/.env
     ports:
       - "3002:3002"
     environment:
@@ -15,6 +30,26 @@ services:
       - kafka
     volumes:
       - ./back/chat-service:/app
+    networks:
+      - app-network
+
+  product-service:
+    build:
+      context: ./back/product-service
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      - PRODUCT_PORT=3003
+      - PRODUCT_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@product-db:5432/product_db?schema=public
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - KAFKA_BROKER=kafka:9092
+    depends_on:
+      - product-db
+      - elasticsearch
+      - kafka
+    volumes:
+      - ./back/product-service:/app
     networks:
       - app-network
 
@@ -49,6 +84,25 @@ services:
     networks:
       - app-network
 
+  product-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=product_db
+      - POSTGRES_INITDB_ARGS=--wal_level=logical
+    volumes:
+      - product-db-data:/var/lib/postgresql/data
+    ports:
+      - "5435:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d product_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.2.1
     environment:
@@ -76,6 +130,69 @@ services:
     networks:
       - app-network
 
+  kafka-connect:
+    image: confluentinc/cp-kafka-connect:7.2.1
+    depends_on:
+      - kafka
+      - product-db
+    ports:
+      - "8083:8083"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka:9092
+      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
+      CONNECT_GROUP_ID: connect-cluster
+      CONNECT_CONFIG_STORAGE_TOPIC: connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: connect-status
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: false
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: false
+      CONNECT_PLUGIN_PATH: /usr/share/java,/usr/share/confluent-hub-components
+    volumes:
+      - ./connect-plugins:/usr/share/confluent-hub-components
+    command:
+      - bash
+      - -c
+      - |
+        /etc/confluent/docker/run &
+        sleep 10
+        confluent-hub install --no-prompt debezium/debezium-connector-postgres:2.3.0
+        wait
+    networks:
+      - app-network
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.name=product-search-cluster
+      - node.name=product-search-node
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - app-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.8.0
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - app-network
+
   api-gateway:
     build:
       context: ./back/gateway
@@ -87,16 +204,17 @@ services:
     depends_on:
       - auth-service
       - chat-service
+      - product-service
     volumes:
       - ./back/gateway/conf.d:/etc/nginx/conf.d
     networks:
       - app-network
 
-
-
 volumes:
   auth-db-data:
   chat-db-data:
+  product-db-data:
+  elasticsearch-data:
 
 networks:
   app-network:
