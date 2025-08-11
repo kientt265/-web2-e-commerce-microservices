@@ -1,15 +1,17 @@
+import { Decimal } from "@prisma/client/runtime/library";
+
 // Product Types
 export interface Product {
   id: number;
   name: string;
-  description?: string;
-  price: number;
-  category_id?: number;
+  description: string | null;
+  price: Decimal;
+  category_id?: number | null;
   images: string[];
   stock: number;
-  created_at?: Date;
-  updated_at?: Date;
-  categories?: Category;
+  created_at?: Date | null;
+  updated_at?: Date | null;
+  categories?: Category | null;
 }
 
 export interface CreateProductRequest {
@@ -38,8 +40,8 @@ export interface UpdateStockRequest {
 export interface Category {
   id: number;
   name: string;
-  description?: string;
-  created_at?: Date;
+  description?: string | null;
+  created_at?: Date | null;
   products?: Product[];
   _count?: {
     products: number;

@@ -32,7 +32,7 @@ export const getAllProducts = async (req: Request, res: Response) => {
           page: Number(page),
           limit: Number(limit),
           total: searchResult.total,
-          totalPages: Math.ceil(searchResult.total / Number(limit))
+          totalPages: Number(searchResult.total) / Number(limit)
         },
         searchInfo: {
           query: search,
@@ -291,7 +291,7 @@ export const searchProducts = async (req: Request, res: Response) => {
         page: Number(page),
         limit: Number(limit),
         total: searchResult.total,
-        totalPages: Math.ceil(searchResult.total / Number(limit))
+        totalPages: Number(searchResult.total) / Number(limit)
       },
       searchInfo: {
         query: q,

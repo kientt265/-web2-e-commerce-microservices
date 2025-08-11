@@ -1,4 +1,3 @@
-\c product_db;
 
 CREATE TABLE categories (
     id SERIAL PRIMARY KEY,

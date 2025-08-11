@@ -27,6 +27,8 @@ export const createConversation = async (req: Request, res: Response) => {
   const { type, name, user_ids } = req.body; 
 
   try {
+    const host_user_id = req.user?.user_id;
+    user_ids.push(host_user_id); 
     const conversation = await prisma.conversations.create({
       data: {
         type,

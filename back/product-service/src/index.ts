@@ -36,7 +36,10 @@ app.get('/health', async (req: express.Request, res: express.Response) => {
 });
 
 // API Routes
-app.use('/api/v1', productRoutes);
+app.use('/', productRoutes);
+app.get('/run', (req, res) => {
+  res.send('Product Service is running');
+});
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

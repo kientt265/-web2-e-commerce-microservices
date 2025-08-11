@@ -198,7 +198,7 @@ export class ElasticsearchService {
           ...hit._source,
           score: hit._score
         })),
-        total: result.hits.total.value,
+        total: result.hits.total?.valueOf,
         took: result.took
       };
     } catch (error) {
@@ -226,10 +226,15 @@ export class ElasticsearchService {
         }
       });
 
-      return result.suggest.product_suggestions[0].options.map((option: any) => ({
-        text: option.text,
-        score: option.score
+    const options = result.suggest?.product_suggestions?.[0]?.options;
+    if (Array.isArray(options) && options.length > 0) {
+      return options.map(opt => ({
+        text: opt.text,
+        score: opt.score
       }));
+    }
+    return [];
+
     } catch (error) {
       console.error('❌ Error getting suggestions:', error);
       return [];
@@ -272,9 +277,9 @@ export class ElasticsearchService {
     try {
       const health = await this.client.cluster.health();
       return {
-        status: health.body.status,
-        numberOfNodes: health.body.number_of_nodes,
-        activeShards: health.body.active_shards
+        status: health.status,
+        numberOfNodes: health.number_of_nodes,
+        activeShards: health.active_shards
       };
     } catch (error) {
       console.error('❌ Elasticsearch health check failed:', error);

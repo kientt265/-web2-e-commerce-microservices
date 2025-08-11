@@ -39,6 +39,7 @@ app.get('/run', (req, res) => {
   res.send('Chat Service is running');
 });
 
+
 server.listen(port, async () => {
     console.log('\n=== Chat Service Status ===');
     console.log(`[Server] 🚀 HTTP Server running on port ${port}`);
