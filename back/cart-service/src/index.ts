@@ -1,0 +1,26 @@
+import express from 'express';
+import { config } from 'dotenv';
+import cors from 'cors';
+import { PrismaClient } from '@prisma/client';
+import { connectRedis } from './config/redis';
+
+config();
+const prisma = new PrismaClient();
+const app = express();
+const port = process.env.CART_PORT || 3004;
+(async () => {
+  await connectRedis();
+})();
+
+app.use(cors());
+app.use(express.json());
+app.get('/run', (req, res) => {
+  res.send('Cart Service is running');
+});
+app.use('*', (req: express.Request, res: express.Response) => {
+  res.status(404).json({ error: 'Route not found' });
+}
+);
+app.listen(port, async () => {
+  console.log(`Cart Service is running on port ${port}`);
+});
