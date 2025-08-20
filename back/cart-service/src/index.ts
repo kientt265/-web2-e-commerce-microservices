@@ -1,10 +1,9 @@
 import express from 'express';
 import { config } from 'dotenv';
 import cors from 'cors';
-import { PrismaClient } from '@prisma/client';
 import { connectRedis } from './config/redis';
 import cartRoutes from './routes/cartRoutes';
-
+import {ensureSession} from './middleware/session';
 config();
 
 const app = express();
@@ -17,6 +16,7 @@ const port = process.env.CART_PORT || 3004;
 app.use(cors());
 app.use(express.json());
 
+app.use(ensureSession);
 
 app.get('/run', (req, res) => {
   res.send('Cart Service is running');

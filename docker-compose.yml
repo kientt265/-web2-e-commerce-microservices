@@ -1,4 +1,4 @@
-services:
++services:
   auth-service:
     build:
       context: ./back/auth-service
@@ -69,7 +69,6 @@ services:
       - ./back/cart-service:/app
     networks:
       - app-network
-
 
   auth-db:
     image: postgres:15
@@ -229,6 +228,7 @@ services:
     networks:
       - app-network
 
+ 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.8.0
     environment:

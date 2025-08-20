@@ -1,20 +1,17 @@
 import { randomUUID } from "crypto";
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, RequestHandler } from "express";
 
-export function ensureSession(req: Request, res: Response, next: NextFunction) {
-  let sessionId = req.cookies.sessionId;
+export const ensureSession: RequestHandler = (req, res, next) => {
+  let sessionId = (req as any).cookies?.sessionId;
 
   if (!sessionId) {
     sessionId = randomUUID();
-
-    // Gửi cookie về cho client
     res.cookie("sessionId", sessionId, {
-      httpOnly: true, // bảo mật, FE JS không đọc được
+      httpOnly: true,
       maxAge: 1000 * 60 * 60 * 2, // 2h
     });
   }
 
-  // gắn sessionId vào request để các API khác dùng
   (req as any).sessionId = sessionId;
   next();
-}
+};
