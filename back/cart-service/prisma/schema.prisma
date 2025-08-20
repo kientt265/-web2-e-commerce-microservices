@@ -4,25 +4,24 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://your_user:your_password@cart-db:5432/cart_db?schema=public"
+  url      = env("CART_DATABASE_URL")
 }
 
-model Cart {
-  id        Int        @id @default(autoincrement())
-  userId    String     
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  items     CartItem[]
+model cart_items {
+  id             Int       @id @default(autoincrement())
+  cart_id        Int
+  product_id     Int
+  quantity       Int       @default(1)
+  price_at_added Decimal   @db.Decimal(10, 2)
+  created_at     DateTime? @default(now()) @db.Timestamp(6)
+  updated_at     DateTime? @default(now()) @db.Timestamp(6)
+  carts          carts     @relation(fields: [cart_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
-model CartItem {
-  id           Int      @id @default(autoincrement())
-  cartId       Int
-  productId    Int      
-  quantity     Int      @default(1)
-  priceAtAdded Decimal  @db.Decimal(10, 2)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  cart         Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+model carts {
+  id         Int          @id @default(autoincrement())
+  user_id    String       @db.Uuid
+  created_at DateTime?    @default(now()) @db.Timestamp(6)
+  updated_at DateTime?    @default(now()) @db.Timestamp(6)
+  cart_items cart_items[]
 }

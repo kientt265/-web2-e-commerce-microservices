@@ -53,6 +53,24 @@ services:
     networks:
       - app-network
 
+  cart-service:
+    build:
+      context: ./back/cart-service
+      dockerfile: Dockerfile
+    ports:
+      - "3004:3004"
+    environment:
+      - CART_PORT=3004
+      - CART_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@cart-db:5432/cart_db?schema=public
+    depends_on:
+      - cart-db
+      - redis 
+    volumes:
+      - ./back/cart-service:/app
+    networks:
+      - app-network
+
+
   auth-db:
     image: postgres:15
     environment:
@@ -99,6 +117,33 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
+
+  cart-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=cart_db
+    volumes:
+      - cart-db-data:/var/lib/postgresql/data
+    ports:
+      - "5436:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d cart_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+  
+  redis:
+    image: redis:7.0.5
+    ports:
+      - "6379:6379" 
+    volumes:
+      - redis-data:/data
     networks:
       - app-network
 
@@ -217,6 +262,8 @@ volumes:
   chat-db-data:
   product-db-data:
   elasticsearch-data:
+  cart-db-data:
+  redis-data:
 
 networks:
   app-network:

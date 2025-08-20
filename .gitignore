@@ -1,6 +1,8 @@
 back/auth-service/node_modules/
 back/chat-service/node_modules/
 back/product-service/node_modules/
+back/cart-service/node_modules/
+back/order-service/node_modules/
 back/.env
 back/auth-service/.env
 back/chat-service/.env
