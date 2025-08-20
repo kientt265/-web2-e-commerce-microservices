@@ -1,12 +1,21 @@
-import { Router} from 'express';
+import { Router } from 'express';
 import { authMiddleware } from '../middleware/auth';
-import { addToCart, removeFromCart, getCartItems } from '../controllers/cartControllers';
-
+import { tempCartController, persistentCartController } from '../controllers/cartControllers';
+import {ensureSession} from '../middleware/session';
 const router = Router();
 
-router.post('/add', addToCart);
-router.delete('/remove', removeFromCart);
-router.get('/', getCartItems);
-router.use(authMiddleware);
+// Temporary cart routes (no auth required)
+router.use(ensureSession);
+router.post('/temp/add', tempCartController.addToCart);
+router.delete('/temp/remove', tempCartController.removeFromCart);
+router.get('/temp', tempCartController.getCartItems);
+
+// Persistent cart routes (auth required)
+router.use('/user', authMiddleware);
+router.post('/user/cart', persistentCartController.createCart);
+router.post('/user/cart/add', persistentCartController.addToCart);
+router.delete('/user/cart/remove', persistentCartController.removeFromCart);
+router.get('/user/cart/:userId', persistentCartController.getCart);
+router.delete('/user/cart/:userId/clear', persistentCartController.clearCart);
 
 export default router;
