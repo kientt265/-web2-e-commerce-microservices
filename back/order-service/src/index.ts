@@ -1,13 +1,14 @@
 import express from 'express';
 import { config } from 'dotenv';
 import cors from 'cors';
+import orderRoutes from './routes/orderRoutes';
 config();
 const app = express();
 const port = process.env.PRODUCT_PORT || 3005;
 
 app.use(cors());
 app.use(express.json());
-
+app.use('/', orderRoutes);
 app.get('/run', (req, res) => {
     res.send('Product Service is running');
 });
