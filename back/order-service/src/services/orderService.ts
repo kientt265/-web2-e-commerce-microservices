@@ -1,6 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, order_status_enum } from '@prisma/client';
 import axios from 'axios';
-import type {Cart, CartItem, Product} from '../types';
+import type {Cart, CartItem, Product, StatusOrder} from '../types';
 const prisma = new PrismaClient();
 
 export const orderService = {
@@ -73,6 +73,7 @@ export const orderService = {
     return order;
   },
 ///////////////NOT CHECK ORTHER API SERVICE///////////////////////////
+//TODO Need check order API from service
   getOrderById: async (orderId: string) => {
     return prisma.orders.findUnique({
       where: { id: Number(orderId) },
@@ -113,7 +114,7 @@ export const orderService = {
     };
   },
 
-  updateOrderStatus: async (orderId: string, status: string) => {
+  updateOrderStatus: async (orderId: string, status: order_status_enum) => {
     return prisma.orders.update({
       where: { id: Number(orderId) },
       data: { 

@@ -64,3 +64,7 @@ export interface OrderItem {
     description: string;
     created_at: Date;
   }
+
+  export interface StatusOrder {
+    status: 'pending' | 'processing' | 'compeleted' | 'cancelled' | 'refunded';
+  }
