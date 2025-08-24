@@ -2,16 +2,13 @@
 
 import { ReturnQueryFromVNPay, VNPay, ignoreLogger } from 'vnpay';
 import { Request } from 'express';
-import { PrismaClient } from '@prisma/client';
-import axios from 'axios';
 
-const prisma = new PrismaClient();
 const vnpay = new VNPay({
     // ⚡ Cấu hình bắt buộc
-    tmnCode: process.env.TMNCODE as string,
-    secureSecret: process.env.SECURESECRET_PAYMENT as string,
+    tmnCode: '0Z77ZM27',
+    secureSecret: 'LK2W9JGCQ07KX1GKYZMLIMIGA4UXZ7QV',
     vnpayHost: 'https://sandbox.vnpayment.vn',
-    
+
     // 🔧 Cấu hình tùy chọn
     testMode: true,                     // Chế độ test ,           // Thuật toán mã hóa
     enableLog: true,                   // Bật/tắt log
@@ -28,7 +25,7 @@ export const getUrlPayment = (totalAmount: number, idOrder: string, ipAddr: stri
     const paymentUrl = vnpay.buildPaymentUrl({
         vnp_Amount: totalAmount,  
         vnp_IpAddr: ipAddr,
-        vnp_ReturnUrl: 'http://payment-service:3006/vnpay/callback',
+        vnp_ReturnUrl: 'http://localhost:3006/return',
         vnp_TxnRef: idOrder,
         vnp_OrderInfo: `Thanh toán đơn hàng ${idOrder}`,
     });
@@ -47,58 +44,3 @@ export const verifyUrlReturn = (req: Request) => {
 }
 
 
-export const handlePaymentCallback = async (query: ReturnQueryFromVNPay, orderId: number) => {
-    const verify = vnpay.verifyReturnUrl(query);
-    
-    // if (!verify.vnp_TxnRef) {
-    //     throw new Error('Không tìm thấy mã đơn hàng');
-    // }
-
-    // const orderId = verify.vnp_TxnRef;
-    
-    try {
-        if (verify.isSuccess) {
-
-            await prisma.payments.update({
-                where: {
-                    id: orderId
-                },
-                data: {
-                    status: 'completed'
-                }
-            });
-
-            await axios.patch(`http://order-service:3005/orders/${orderId}/status`, {
-                status: 'processing'
-            });
-
-            return {
-                success: true,
-                message: 'Thanh toán thành công'
-            };
-        } else {
-
-            await prisma.payments.update({
-                where: {
-                    id: orderId
-                },
-                data: {
-                    status: 'failed',
-                    payment_details: verify
-                }
-            });
-
-            await axios.patch(`http://order-service:3005/orders/${orderId}/status`, {
-                status: 'cancelled'
-            });
-
-            return {
-                success: false,
-                message: 'Thanh toán thất bại: ' + verify.message
-            };
-        }
-    } catch (error) {
-        console.error('Lỗi xử lý callback thanh toán:', error);
-        throw error;
-    }
-}
