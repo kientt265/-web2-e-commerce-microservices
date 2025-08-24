@@ -1,220 +1,214 @@
-# Chat Application
+# E-commerce Microservices System
 
-This is a real-time chat application built using a microservice architecture with Node.js, TypeScript, Kafka, Zookeeper, PostgreSQL, and an integrated AI agent service. The application uses Docker to manage services, ensuring easy setup and scalability. The AI agent enables multiple automated tasks, such as conversation assistance, tool invocation, and intelligent message handling.
+This project is an e-commerce system built with a distributed microservices architecture. It leverages Kafka as a message broker for inter-service communication, ensuring data consistency and scalability. The system has evolved from a chat application, with AI components removed and replaced by e-commerce functionalities.
 
 ## Project Overview
 
+The application is composed of several microservices, each responsible for a specific business domain:
 
-The application consists of:
-- A chat microservice (`chat-service`) that handles chat functionality, integrated with Kafka for message streaming and PostgreSQL for persistent storage.
-- An AI agent microservice that provides intelligent automation for multiple tasks, such as conversation management, tool calling, and message processing.
-Zookeeper is used to manage Kafka's metadata.
+*   **User Service:** Manages user information, authentication, and authorization.
+*   **Product Service:** Handles product information, categories, and inventory.
+*   **Cart Service:** Manages temporary shopping carts using Redis for high-speed data access.
+*   **Order Service:** Processes orders, manages payment flows, and tracks order history.
+*   **Payment Service:** Integrates with VNPay for secure and efficient payment processing.
+*   **Search Service:** Utilizes Elasticsearch for fast and efficient product search capabilities.
 
+## Technologies Used
 
-### Services
-- **chat-service**: A Node.js/Express microservice for handling chat logic, built with TypeScript.
-- **agent-service**: A Python FastAPI microservice powered by LangChain, providing AI agent capabilities for multiple tasks (conversation, tool invocation, automation).
-- **postgres**: PostgreSQL database for storing users, conversations, and messages.
-- **kafka**: Kafka message broker for real-time message streaming.
-- **zookeeper**: Manages Kafka's metadata and coordination.
+This project incorporates a variety of modern technologies to ensure robustness, scalability, and performance:
+
+*   **Languages:** Node.js (TypeScript), Python
+*   **Frameworks:** Express (for Node.js services), FastAPI (for Python services)
+*   **Databases:** PostgreSQL (for persistent data storage), Redis (for caching and temporary data like shopping carts)
+*   **Message Broker:** Apache Kafka (for asynchronous communication and event streaming)
+*   **Change Data Capture (CDC):** Debezium (for capturing row-level changes in databases and streaming them to Kafka)
+*   **Search Engine:** Elasticsearch (for full-text search and analytics on product data)
+*   **Payment Gateway:** VNPay (a popular payment solution in Vietnam)
+*   **Containerization:** Docker, Docker Compose (for defining and running multi-container Docker applications)
+
+## Architecture Diagram
+
+(An architecture diagram illustrating the microservices, their interactions, and data flows would be placed here. This would typically show Kafka as the central message bus, with services communicating through it, and separate databases for each service where applicable, along with Elasticsearch and Redis.)
 
 ## Prerequisites
 
+To set up and run this project, ensure you have the following installed on your system:
 
-To run this project, ensure you have the following installed:
-- **Docker**: Version 20.10 or later.
-- **Docker Compose**: Version 2.0 or later.
-- **Node.js**: Version 18 (only needed if you want to run the project without Docker for development).
-- **npm**: Version 8 or later (for local development).
-- **Python**: Version 3.10 or later (required for agent-service).
-- **LangChain**: Python library for building AI agents (required for agent-service).
+*   **Docker**: Version 20.10 or later.
+*   **Docker Compose**: Version 2.0 or later.
 
-Verify installation:
-```bash
+Verify your installations by running:
+
+```shell
 docker --version
 docker-compose --version
-node --version
-npm --version
 ```
 
 ## Project Structure
 
+The repository is organized into several directories, each representing a microservice or a core component:
+
 ```
-web2-chat-app/
-├── back/                         # Chat microservice source code
+-web2-e-commerce-microservices/
+├── back/                         # Contains backend services (e.g., User, Product, Order, Cart, Payment)
 │   ├── src/
-│   │   ├── index.ts              # Main entry point for chat-service
-│   │   ├── user/                 # User-related logic (controllers, models, routes)
-│   │   ├── chatbot/              # Chatbot logic and integrations
-│   │   ├── agent/                # Agent management and logic (controllers, models, routes)
-│   │   ├── message/              # Message handling (controllers, models, routes)
+│   │   ├── user/                 # User service logic
+│   │   ├── product/              # Product service logic
+│   │   ├── cart/                 # Cart service logic
+│   │   ├── order/                # Order service logic
+│   │   ├── payment/              # Payment service logic
 │   │   ├── kafka/                # Kafka producer/consumer utilities
 │   │   ├── db/                   # Database connection and models
 │   │   └── utils/                # Utility functions and helpers
 │   ├── package.json              # Node.js dependencies and scripts
 │   ├── tsconfig.json             # TypeScript configuration
-│   └── Dockerfile                # Dockerfile for chat-service
+│   └── Dockerfile                # Dockerfile for Node.js services
+├── front/                        # Frontend application (e.g., React, Angular, Vue.js)
+│   ├── src/
+│   └── ...
 ├── docker-compose.yml            # Docker Compose configuration for all services
+├── create-topics.sh              # Script to create Kafka topics
 ├── .gitignore                    # Git ignore file
-└── README.md                     # Project documentation
+├── README.markdown               # Project documentation
+└── ...
 ```
 
 ## Setup and Running the Project
 
-Follow these steps to start the project using Docker.
+Follow these steps to get the e-commerce microservices system up and running using Docker:
 
 ### 1. Clone the Repository
-Clone the project to your local machine:
-```bash
-git clone <repository-url>
-cd web2-chat-app
+
+First, clone the project repository to your local machine:
+
+```shell
+git clone https://github.com/kientt265/-web2-e-commerce-microservices.git
+cd -web2-e-commerce-microservices
 ```
 
-### 2. Verify Project Files
-Ensure the following files exist:
-- `docker-compose.yml` in the root directory.
-- `back/package.json`, `back/tsconfig.json`, `back/Dockerfile`, and `back/src/index.ts`.
+### 2. Build and Start the Services
 
-If any file is missing, contact the project owner or refer to the project documentation to restore them.
+Navigate to the project root directory and use Docker Compose to build and start all defined services. This command will pull necessary images, build custom service images, and start all containers in detached mode.
 
-### 3. Build and Start the Services
-Run the following command to build and start all services (`chat-service`, `postgres`, `kafka`, `zookeeper`):
-```bash
+```shell
 docker-compose up --build -d
 ```
-- `--build`: Builds the Docker image for `chat-service` from the `Dockerfile`.
-- `-d`: Runs containers in detached mode (in the background).
 
-This command will:
-- Pull images for `postgres:15`, `confluentinc/cp-zookeeper:7.2.1`, and `confluentinc/cp-kafka:7.2.1`.
-- Build the `chat-service` image from the `back` directory.
-- Start all containers and connect them via the `chat-network` network.
+*   `--build`: Rebuilds service images (e.g., for `back` and `front` services) from their respective Dockerfiles.
+*   `-d`: Runs containers in detached mode, allowing them to run in the background.
+
+This process will:
+
+*   Pull images for PostgreSQL, Kafka, Zookeeper, Elasticsearch, Redis, and Debezium.
+*   Build custom images for your Node.js/TypeScript and Python services.
+*   Start all containers and connect them via a Docker network.
+
+### 3. Create Kafka Topics
+
+After the services are up, you need to create the necessary Kafka topics for inter-service communication. A convenience script `create-topics.sh` is provided for this purpose:
+
+```shell
+./create-topics.sh
+```
+
+This script typically contains commands to create topics such as `product-events`, `order-events`, `payment-events`, `cart-events`, etc., which are crucial for the microservices to communicate effectively.
 
 ### 4. Verify Services
-Check if all containers are running:
-```bash
+
+To ensure all services are running correctly, you can check the status of your Docker containers:
+
+```shell
 docker ps
 ```
-You should see four containers:
-- `web2-chat-app_chat-service_1`
-- `web2-chat-app_postgres_1`
-- `web2-chat-app_kafka_1`
-- `web2-chat-app_zookeeper_1`
 
-View logs for a specific service (e.g., `chat-service`):
-```bash
-docker logs web2-chat-app_chat-service_1
-```
-You should see a message like:
-```
-Chat Service is running on port 3000
+You should see a list of running containers, including those for PostgreSQL, Kafka, Zookeeper, Elasticsearch, Redis, Debezium, and your custom microservices (e.g., `user-service`, `product-service`, `cart-service`, `order-service`, `payment-service`, `search-service`).
+
+To view logs for a specific service (e.g., `product-service`):
+
+```shell
+docker logs <container_name_or_id>
 ```
 
-### 5. Test the Application
-Test the `chat-service` endpoint:
-```bash
-curl http://localhost:3000
-```
-Expected response:
-```
-Chat Service is running
-```
+Replace `<container_name_or_id>` with the actual name or ID of the service container you want to inspect.
+
+### 5. Access the Application
+
+Once all services are running, you can access the frontend application (if available) via your web browser, typically at `http://localhost:<frontend_port>`. Refer to your `docker-compose.yml` or frontend service configuration for the exact port.
+
+API endpoints for individual microservices will also be available, usually at `http://localhost:<service_port>`.
 
 ### 6. Stopping the Services
-To stop and remove all containers:
-```bash
+
+To stop and remove all running containers and their associated networks:
+
+```shell
 docker-compose down
 ```
-To also remove volumes (e.g., PostgreSQL data), add `-v`:
-```bash
+
+To also remove volumes (e.g., PostgreSQL data, Elasticsearch data), which will delete all persistent data, add the `-v` flag:
+
+```shell
 docker-compose down -v
 ```
-**Note**: Using `-v` will delete the PostgreSQL database, so only use it if you want to reset all data.
 
-## Development Mode (Optional)
-
-If you want to run the `chat-service` locally (without Docker) for development:
-1. Navigate to the `back` directory:
-   ```bash
-   cd back
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Run in development mode (auto-restarts on code changes):
-   ```bash
-   npm run dev
-   ```
-   This uses `ts-node-dev` to run `src/index.ts` directly.
-
-**Note**: Ensure `postgres`, `kafka`, and `zookeeper` containers are running via `docker-compose up -d` to provide the necessary services.
+**Note**: Use `-v` with caution, as it will permanently delete all data stored by the services. Only use it if you intend to reset the entire system.
 
 ## Database Schema
 
-The PostgreSQL database (`chatdb`) includes the following tables:
-- `users`: Stores user information (user_id, username, email, password_hash).
-- `conversations`: Stores chat sessions (private or group).
-- `conversation_members`: Links users to conversations.
-- `messages`: Stores chat messages.
-- `message_deliveries`: Tracks message delivery and read status.
+Each microservice typically manages its own database schema. For example:
 
-To initialize the database schema:
-1. Connect to the PostgreSQL container:
-   ```bash
-   docker exec -it web2-chat-app_postgres_1 psql -U admin -d chatdb
-   ```
-2. Run the SQL script to create tables (refer to the project documentation for the SQL script).
+*   **User Service Database (PostgreSQL):**
+    *   `users`: Stores user profiles (e.g., `user_id`, `username`, `email`, `password_hash`, `address`).
+    *   `roles`: Defines user roles and permissions.
+*   **Product Service Database (PostgreSQL):**
+    *   `products`: Stores product details (e.g., `product_id`, `name`, `description`, `price`, `stock`, `category_id`).
+    *   `categories`: Defines product categories.
+*   **Order Service Database (PostgreSQL):**
+    *   `orders`: Stores order information (e.g., `order_id`, `user_id`, `order_date`, `total_amount`, `status`).
+    *   `order_items`: Details of items within an order.
+
+Redis is used for the Cart Service to store temporary shopping cart data, which is typically a key-value store where keys could be `user_id` and values are serialized cart contents.
 
 ## Kafka Configuration
 
-Kafka is used for real-time message streaming. The `chat-messages` topic can be created as follows:
-1. Access the Kafka container:
-   ```bash
-   docker exec -it web2-chat-app_kafka_1 bash
-   ```
-2. Create the topic:
-   ```bash
-   kafka-topics.sh --create --topic chat-messages --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1
-   ```
+Kafka is central to the inter-service communication. Key topics include:
 
-## Code Quality Tools
+*   `product-events`: For product-related events (e.g., product created, updated, deleted).
+*   `order-events`: For order-related events (e.g., order placed, order status updated).
+*   `payment-events`: For payment-related events (e.g., payment successful, payment failed).
+*   `cart-events`: For shopping cart events (e.g., item added to cart, item removed from cart).
 
-   To maintain code quality and consistency, this project uses linting and formatting tools. You can run these tools using the provided `Makefile` commands.
+These topics are created by the `create-topics.sh` script. You can inspect Kafka topics using Kafka command-line tools if needed.
 
-   ### Linting
+## Debezium (Change Data Capture)
 
-   Run the linter to check for code issues:
-   ```bash
-   make lint
-   ```
-   This command uses ESLint to analyze the codebase and report any style or syntax problems.
+Debezium is configured to capture changes from the PostgreSQL databases (e.g., `products` table in Product Service) and stream these changes as events to Kafka topics. This enables other services, like the Search Service, to react to data changes in real-time.
 
-   ### Formatting
+## Elasticsearch
 
-   Automatically format your code to match the project's style guidelines:
-   ```bash
-   make format
-   ```
-   This command uses Prettier to format your code files.
+The Search Service indexes product data into Elasticsearch. This allows for powerful and fast full-text search capabilities, including filtering, sorting, and faceting. The data is kept in sync with the Product Service database via Debezium and Kafka.
 
-   **Note:** Ensure you have the required dependencies installed by running `npm install` in the `back` directory before using these commands.
+## VNPay Integration
 
-## Troubleshooting
+The Payment Service integrates with VNPay, a popular payment gateway. This integration handles the secure redirection of users to the VNPay portal for payment, and processes the callback from VNPay to update order statuses.
 
-- **Error: `npm error code ENOENT` (missing package.json)**:
-  - Ensure `back/package.json` exists.
-  - Run `npm install` in the `back` directory.
-- **Error: `ts-node-dev: not found`**:
-  - Install `ts-node-dev`:
-    ```bash
-    cd back
-    npm install --save-dev ts-node-dev
-    ```
-- **Error: `KAFKA_PROCESS_ROLES is required`**:
-  - Ensure Kafka is using `confluentinc/cp-kafka:7.2.1` and Zookeeper is running.
-- **Database connection issues**:
-  - Verify PostgreSQL is running (`docker ps`) and use the correct credentials (`admin`/`password`).
-- **General Docker issues**:
-  - Clear unused resources:
-    ```bash
+## Contributing
+
+Contributions are welcome! If you'd like to contribute to this project, please follow these steps:
+
+1.  Fork the repository.
+2.  Create a new branch for your feature or bug fix.
+3.  Make your changes and ensure they adhere to the project's coding standards.
+4.  Write clear and concise commit messages.
+5.  Push your changes to your forked repository.
+6.  Submit a pull request to the `master` branch of this repository.
+
+## License
+
+(Add license information here, e.g., MIT License, Apache 2.0 License, etc.)
+
+## Acknowledgements
+
+(Optional: Acknowledge any libraries, tools, or individuals that have significantly contributed to the project.)
+
+
