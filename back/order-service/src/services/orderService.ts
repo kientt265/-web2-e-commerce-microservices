@@ -1,5 +1,6 @@
 import { PrismaClient, order_status_enum } from '@prisma/client';
 import axios from 'axios';
+import {producer} from '../config/kafka';
 import type {Cart, CartItem, Product, StatusOrder} from '../types';
 const prisma = new PrismaClient();
 
@@ -13,22 +14,22 @@ export const orderService = {
       throw new Error('Cart is empty');
     }
     //check inventory
-    const productChecks = await Promise.all(
-      cart.cart_items.map(
-        async (item: CartItem) => {
-        const productResponse = await axios.get<Product>(`http://product-service:3003/products/${item.product_id}`);
-        return {
-          product: productResponse.data,
-          quantity: item.quantity
-        };
-      })
-    );
+    // const productChecks = await Promise.all(
+    //   cart.cart_items.map(
+    //     async (item: CartItem) => {
+    //     const productResponse = await axios.get<Product>(`http://product-service:3003/products/${item.product_id}`);
+    //     return {
+    //       product: productResponse.data,
+    //       quantity: item.quantity
+    //     };
+    //   })
+    // );
 
-    for (const check of productChecks) {
-      if (check.product.stock < check.quantity) {
-        throw new Error(`Insufficient stock for product ${check.product.name}`);
-      }
-    }
+    // for (const check of productChecks) {
+    //   if (check.product.stock < check.quantity) {
+    //     throw new Error(`Insufficient stock for product ${check.product.name}`);
+    //   }
+    // }
 
     const order = await prisma.$transaction(async (tx: any) => {
       const order = await tx.orders.create({
@@ -52,6 +53,24 @@ export const orderService = {
         }))
       });
 
+      const message = {
+        eventType: 'ORDER_CREATED',
+        orderId: order.id,
+        userId: userId,
+        status: order.status,
+        totalAmount: order.total_amount,
+        items: cart.cart_items.map((item: CartItem) => ({
+          productId: item.product_id,
+          quantity: item.quantity,
+          price: item.price_at_added
+        })),
+        createdAt: new Date().toISOString()
+      }
+      const topic = 'order-events';
+      await producer.send({
+        topic,
+        messages:[{value: JSON.stringify(message)}],
+      });
       return order;
     });
 
@@ -65,10 +84,10 @@ export const orderService = {
 
     await axios.delete(`http://cart-service:3004/api/cart/user/cart/${userId}/clear`);
 
-    await axios.post('http://payment-service:3006/payments', {
-      order_id: order.id,
-      amount: order.total_amount
-    });
+    // await axios.post('http://payment-service:3006/payments', {
+    //   order_id: order.id,
+    //   amount: order.total_amount
+    // });
 
     return order;
   },
