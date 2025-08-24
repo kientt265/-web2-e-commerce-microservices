@@ -2,7 +2,7 @@ import express from 'express';
 import { config } from 'dotenv';
 import productRoutes from './routes/productRoute';
 import { elasticsearchService } from './services/elasticsearchService';
-import { kafkaService } from './services/kafkaService';
+import { kafkaService } from './services/kafkaServiceElastic';
 
 config();
 
