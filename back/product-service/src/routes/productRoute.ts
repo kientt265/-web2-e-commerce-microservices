@@ -8,11 +8,11 @@ import {
   updateProductStock,
   searchProducts,
   suggestProducts,
-  getAllCategories,
-  getCategoryById,
-  createCategory,
-  updateCategory,
-  deleteCategory
+  getAllCategoriesController,
+  getCategoryByIdController,
+  createCategoryController,
+  updateCategoryController,
+  deleteCategoryController
 } from '../controllers/productController';
 import {
   validateProduct,
@@ -38,12 +38,12 @@ router.get('/search/products', searchProducts);
 router.get('/suggest/products', suggestProducts);
 
 // Category Routes
-router.get('/categories', getAllCategories);
-router.get('/categories/:id', validateId, getCategoryById);
+router.get('/categories', getAllCategoriesController);
+router.get('/categories/:id', validateId, getCategoryByIdController);
 
 // CRUD for admin
-router.post('/categories', validateCategory, createCategory);
-router.put('/categories/:id', validateId, validateCategory, updateCategory);
-router.delete('/categories/:id', validateId, deleteCategory);
+router.post('/categories', validateCategory, createCategoryController);
+router.put('/categories/:id', validateId, validateCategory, updateCategoryController);
+router.delete('/categories/:id', validateId, deleteCategoryController);
 
 export default router;
