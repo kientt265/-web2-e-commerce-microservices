@@ -1,3 +1,4 @@
+#//TODO: Thêm kafka vào các service thiếu
 services:
   auth-service:
     build:
@@ -24,8 +25,10 @@ services:
     environment:
       - ORDER_PORT=3005
       - ORDER_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@order-db:5432/order_db?schema=public
+      - KAFKA_BROKER=kafka:9092
     depends_on:
       - order-db
+      - kafka
     volumes:
       - ./back/order-service:/app
     networks:
@@ -95,8 +98,10 @@ services:
     environment:
       - PAYMENT_PORT=3006
       - PAYMENT_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@payment-db:5432/payment_db?schema=public
+      - KAFKA_BROKER=kafka:9092
     depends_on:
       - payment-db
+      - kafka
     volumes:
       - ./back/payment-service:/app
     networks:
@@ -241,6 +246,16 @@ services:
       - "9092:9092"
     networks:
       - app-network
+        volumes:
+      - ./create-topics.sh:/docker-entrypoint-initdb.d/create-topics.sh
+    command:
+      - bash
+      - -c
+      - |
+        /etc/confluent/docker/run &
+        sleep 30
+        /docker-entrypoint-initdb.d/create-topics.sh
+        wait
 
   kafka-connect:
     image: confluentinc/cp-kafka-connect:7.2.1
@@ -297,7 +312,6 @@ services:
     networks:
       - app-network
 
- 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.8.0
     environment:
@@ -321,6 +335,7 @@ services:
       - auth-service
       - chat-service
       - product-service
+
     volumes:
       - ./back/gateway/conf.d:/etc/nginx/conf.d
     networks:
