@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("MAIL_DATABASE_URL")
+}
+
+
+enum email_status {
+  PENDING
+  SENT
+  FAILED
+}
+
+model Email_Templates {
+  id         Int       @id @default(autoincrement())
+  name       String    @db.VarChar(100)
+  subject    String    @db.VarChar(255)
+  body       String
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  Emails     Emails[]
+}
+
+model Emails {
+  id         Int           @id @default(autoincrement())
+  recipient  String        @db.VarChar(255)
+  subject    String        @db.VarChar(255)
+  body       String
+  status     email_status  @default(PENDING)
+  template   Email_Templates? @relation(fields: [template_id], references: [id])
+  template_id Int?
+  sent_at    DateTime?
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
+  retryLogs        Email_Retry_Log[]
+}
+
+model Email_Retry_Log {
+  id         Int      @id @default(autoincrement())
+  email_id   Int
+  error      String
+  retried_at DateTime @default(now())
+  Emails     Emails   @relation(fields: [email_id], references: [id])
+}

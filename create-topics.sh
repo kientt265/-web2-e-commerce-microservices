@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TOPICS=("product-events" "order-events" "payment-events")
+TOPICS=("product-events" "order-events" "payment-events" "mail-events")
 
 for topic in "${TOPICS[@]}"
 do
