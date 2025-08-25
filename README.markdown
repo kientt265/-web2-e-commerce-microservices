@@ -12,6 +12,7 @@ The application is composed of several microservices, each responsible for a spe
 *   **Order Service:** Processes orders, manages payment flows, and tracks order history.
 *   **Payment Service:** Integrates with VNPay for secure and efficient payment processing.
 *   **Search Service:** Utilizes Elasticsearch for fast and efficient product search capabilities.
+*   **Mail Service:** Sends email notifications to users, particularly for new order confirmations, using SMTP.
 
 ## Technologies Used
 
@@ -24,11 +25,12 @@ This project incorporates a variety of modern technologies to ensure robustness,
 *   **Change Data Capture (CDC):** Debezium (for capturing row-level changes in databases and streaming them to Kafka)
 *   **Search Engine:** Elasticsearch (for full-text search and analytics on product data)
 *   **Payment Gateway:** VNPay (a popular payment solution in Vietnam)
+*   **Email Protocol:** SMTP (for sending transactional emails)
 *   **Containerization:** Docker, Docker Compose (for defining and running multi-container Docker applications)
 
 ## Architecture Diagram
 
-(An architecture diagram illustrating the microservices, their interactions, and data flows would be placed here. This would typically show Kafka as the central message bus, with services communicating through it, and separate databases for each service where applicable, along with Elasticsearch and Redis.)
+(An architecture diagram illustrating the microservices, their interactions, and data flows would be placed here. This would typically show Kafka as the central message bus, with services communicating through it, and separate databases for each service where applicable, along with Elasticsearch, Redis, and the new Mail Service.)
 
 ## Prerequisites
 
@@ -50,13 +52,14 @@ The repository is organized into several directories, each representing a micros
 
 ```
 -web2-e-commerce-microservices/
-├── back/                         # Contains backend services (e.g., User, Product, Order, Cart, Payment)
+├── back/                         # Contains backend services (e.g., User, Product, Order, Cart, Payment, Mail)
 │   ├── src/
 │   │   ├── user/                 # User service logic
 │   │   ├── product/              # Product service logic
 │   │   ├── cart/                 # Cart service logic
 │   │   ├── order/                # Order service logic
 │   │   ├── payment/              # Payment service logic
+│   │   ├── mail/                 # Mail service logic
 │   │   ├── kafka/                # Kafka producer/consumer utilities
 │   │   ├── db/                   # Database connection and models
 │   │   └── utils/                # Utility functions and helpers
@@ -111,7 +114,7 @@ After the services are up, you need to create the necessary Kafka topics for int
 ./create-topics.sh
 ```
 
-This script typically contains commands to create topics such as `product-events`, `order-events`, `payment-events`, `cart-events`, etc., which are crucial for the microservices to communicate effectively.
+This script typically contains commands to create topics such as `product-events`, `order-events`, `payment-events`, `cart-events`, `mail-events` etc., which are crucial for the microservices to communicate effectively.
 
 ### 4. Verify Services
 
@@ -121,7 +124,7 @@ To ensure all services are running correctly, you can check the status of your D
 docker ps
 ```
 
-You should see a list of running containers, including those for PostgreSQL, Kafka, Zookeeper, Elasticsearch, Redis, Debezium, and your custom microservices (e.g., `user-service`, `product-service`, `cart-service`, `order-service`, `payment-service`, `search-service`).
+You should see a list of running containers, including those for PostgreSQL, Kafka, Zookeeper, Elasticsearch, Redis, Debezium, and your custom microservices (e.g., `user-service`, `product-service`, `cart-service`, `order-service`, `payment-service`, `search-service`, `mail-service`).
 
 To view logs for a specific service (e.g., `product-service`):
 
@@ -177,6 +180,7 @@ Kafka is central to the inter-service communication. Key topics include:
 *   `order-events`: For order-related events (e.g., order placed, order status updated).
 *   `payment-events`: For payment-related events (e.g., payment successful, payment failed).
 *   `cart-events`: For shopping cart events (e.g., item added to cart, item removed from cart).
+*   `mail-events`: For events triggering email notifications (e.g., new order confirmation).
 
 These topics are created by the `create-topics.sh` script. You can inspect Kafka topics using Kafka command-line tools if needed.
 
@@ -191,6 +195,10 @@ The Search Service indexes product data into Elasticsearch. This allows for powe
 ## VNPay Integration
 
 The Payment Service integrates with VNPay, a popular payment gateway. This integration handles the secure redirection of users to the VNPay portal for payment, and processes the callback from VNPay to update order statuses.
+
+## Mail Service
+
+The Mail Service is responsible for sending email notifications to users. It listens for specific events on Kafka (e.g., `order-events` for new order confirmations) and uses SMTP to send out emails. This ensures users receive timely updates regarding their interactions with the e-commerce system.
 
 ## Contributing
 
