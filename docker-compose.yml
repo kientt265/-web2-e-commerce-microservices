@@ -114,7 +114,7 @@ services:
     - "3007:3007"
     environment:
     - MAIL_PORT=3007
-    - MAIL_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@payment-db:5432/payment_db?schema=public
+    - MAIL_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@mail-db:5432/mail_db?schema=public
     - KAFKA_BROKER=kafka:9092
     depends_on:
     - mail-db

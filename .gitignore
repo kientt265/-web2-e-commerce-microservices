@@ -5,6 +5,7 @@ back/cart-service/node_modules/
 back/order-service/node_modules/
 back/payment-service/node_modules/
 back/order-service/node_modules/
+back/mail-service/node_modules/
 back/.env
 back/auth-service/.env
 back/chat-service/.env

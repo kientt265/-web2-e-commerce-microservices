@@ -17,7 +17,7 @@ export async function initKafka() {
                 console.log(`[Kafka] 📨 Received message on topic "${topic}":`);
                 switch(msg.eventType) {
                     case "ORDER_CREATED":
-                      const product = await updateProductStockService(msg.id, msg.quantity);
+                      const product = await updateProductStockService(msg.items.productId, msg.items.quantity);
                       break;
                     case "**":
                       // update order = "cancelled"

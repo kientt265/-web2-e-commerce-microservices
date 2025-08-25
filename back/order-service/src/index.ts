@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/', orderRoutes);
 app.get('/run', (req, res) => {
-    res.send('Product Service is running');
+    res.send('Order Service is running');
 });
 
 server.listen(port, async () => {
