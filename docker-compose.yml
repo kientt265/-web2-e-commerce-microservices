@@ -413,18 +413,19 @@ services:
     networks:
       - app-network
 
-filebeat:
-  image: docker.elastic.co/beats/filebeat:8.8.0
-  container_name: filebeat
-  user: root
-  volumes:
-    - /var/lib/docker/containers:/var/lib/docker/containers:ro
-    - /var/run/docker.sock:/var/run/docker.sock:ro
-    - ./elk/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-  depends_on:
-    - elk-logstash
-  networks:
-    - app-network
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.8.0
+    command: filebeat -e -strict.perms=false
+    container_name: filebeat
+    user: root
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./elk/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+    depends_on:
+      - elk-logstash
+    networks:
+      - app-network
 
 
 volumes:
@@ -432,6 +433,7 @@ volumes:
   chat-db-data:
   product-db-data:
   elasticsearch-data:
+  elk-es-data:
   cart-db-data:
   redis-data:
   order-db-data:
