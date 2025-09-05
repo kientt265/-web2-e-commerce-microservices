@@ -2,6 +2,9 @@
 
 This project is a comprehensive e-commerce system built with a distributed microservices architecture, now organized as a monorepo. It leverages Kafka as a message broker for inter-service communication, ensuring data consistency and scalability. The system has evolved to include robust logging with the ELK Stack and a highly available API Gateway managed by Nginx.
 
+![Alt text](../web2-e-comerce-microservices/front/public/flow_diagram.png "Tooltip optional")
+
+
 ## Project Overview
 
 This application is composed of several microservices, each responsible for a specific business domain, along with infrastructure components for logging and API management:
