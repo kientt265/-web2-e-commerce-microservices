@@ -1,0 +1,16 @@
+filebeat.inputs:
+  - type: container
+    paths:
+      - /var/lib/docker/containers/*/*.log
+    processors:
+      - add_docker_metadata: ~
+      - drop_event:
+          when:
+            equals:
+              container.name: "redis-1"
+      - decode_json_fields:
+          fields: ["message"]
+          target: "json"
+
+output.logstash:
+  hosts: ["elk-logstash:5044"]

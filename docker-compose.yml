@@ -124,7 +124,6 @@ services:
     networks:
     - app-network
 
-
   auth-db:
     image: postgres:15
     environment:
@@ -375,6 +374,58 @@ services:
       - ./back/gateway/conf.d:/etc/nginx/conf.d
     networks:
       - app-network
+
+  elk-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+    container_name: elk-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9201:9200"
+    volumes:
+      - elk-es-data:/usr/share/elasticsearch/data
+    networks:
+      - app-network
+
+  elk-kibana:
+    image: docker.elastic.co/kibana/kibana:8.8.0
+    container_name: elk-kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elk-elasticsearch:9201
+    ports:
+      - "5602:5601"
+    depends_on:
+      - elk-elasticsearch
+    networks:
+      - app-network      
+
+  elk-logstash:
+    image: docker.elastic.co/logstash/logstash:8.8.0
+    container_name: elk-logstash
+    ports:
+      - "5044:5044"
+    volumes:
+      - ./elk/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    depends_on:
+      - elk-elasticsearch
+    networks:
+      - app-network
+
+filebeat:
+  image: docker.elastic.co/beats/filebeat:8.8.0
+  container_name: filebeat
+  user: root
+  volumes:
+    - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    - ./elk/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+  depends_on:
+    - elk-logstash
+  networks:
+    - app-network
+
 
 volumes:
   auth-db-data:
