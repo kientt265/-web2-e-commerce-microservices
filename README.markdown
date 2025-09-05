@@ -1,10 +1,10 @@
-# E-commerce Microservices System
+# E-commerce Microservices Monorepo
 
-This project is an e-commerce system built with a distributed microservices architecture. It leverages Kafka as a message broker for inter-service communication, ensuring data consistency and scalability. The system has evolved from a chat application, with AI components removed and replaced by e-commerce functionalities.
+This project is a comprehensive e-commerce system built with a distributed microservices architecture, now organized as a monorepo. It leverages Kafka as a message broker for inter-service communication, ensuring data consistency and scalability. The system has evolved to include robust logging with the ELK Stack and a highly available API Gateway managed by Nginx.
 
 ## Project Overview
 
-The application is composed of several microservices, each responsible for a specific business domain:
+This application is composed of several microservices, each responsible for a specific business domain, along with infrastructure components for logging and API management:
 
 *   **User Service:** Manages user information, authentication, and authorization.
 *   **Product Service:** Handles product information, categories, and inventory.
@@ -13,10 +13,13 @@ The application is composed of several microservices, each responsible for a spe
 *   **Payment Service:** Integrates with VNPay for secure and efficient payment processing.
 *   **Search Service:** Utilizes Elasticsearch for fast and efficient product search capabilities.
 *   **Mail Service:** Sends email notifications to users, particularly for new order confirmations, using SMTP.
+*   **API Gateway:** A central entry point for all client requests, routing them to the appropriate microservices. Managed by multiple instances for high availability.
+*   **Nginx Load Balancer:** Distributes incoming traffic across multiple API Gateway instances, ensuring high availability and fault tolerance.
+*   **ELK Stack (Elasticsearch, Logstash, Kibana):** A powerful suite for centralized logging, enabling efficient collection, parsing, storage, and visualization of logs from all microservices.
 
 ## Technologies Used
 
-This project incorporates a variety of modern technologies to ensure robustness, scalability, and performance:
+This project incorporates a variety of modern technologies to ensure robustness, scalability, performance, and observability:
 
 *   **Languages:** Node.js (TypeScript), Python
 *   **Frameworks:** Express (for Node.js services), FastAPI (for Python services)
@@ -26,11 +29,14 @@ This project incorporates a variety of modern technologies to ensure robustness,
 *   **Search Engine:** Elasticsearch (for full-text search and analytics on product data)
 *   **Payment Gateway:** VNPay (a popular payment solution in Vietnam)
 *   **Email Protocol:** SMTP (for sending transactional emails)
+*   **API Gateway:** (Specific technology if known, otherwise generic term)
+*   **Load Balancer:** Nginx
+*   **Logging & Monitoring:** Elasticsearch, Logstash, Kibana (ELK Stack)
 *   **Containerization:** Docker, Docker Compose (for defining and running multi-container Docker applications)
 
 ## Architecture Diagram
 
-(An architecture diagram illustrating the microservices, their interactions, and data flows would be placed here. This would typically show Kafka as the central message bus, with services communicating through it, and separate databases for each service where applicable, along with Elasticsearch, Redis, and the new Mail Service.)
+(An updated architecture diagram illustrating the microservices, their interactions, data flows, the API Gateway with Nginx Load Balancer, and the ELK Stack for centralized logging would be placed here. This would typically show Kafka as the central message bus, with services communicating through it, and separate databases for each service where applicable, along with Elasticsearch, Redis, Mail Service, and the new infrastructure components.)
 
 ## Prerequisites
 
@@ -48,28 +54,21 @@ docker-compose --version
 
 ## Project Structure
 
-The repository is organized into several directories, each representing a microservice or a core component:
+The repository is organized as a monorepo, with several top-level directories representing different components of the system:
 
 ```
--web2-e-commerce-microservices/
-├── back/                         # Contains backend services (e.g., User, Product, Order, Cart, Payment, Mail)
+-web2-e-commerce-microservices-monorepo/
+├── back/                         # Contains backend microservices (e.g., User, Product, Order, Cart, Payment, Mail)
 │   ├── src/
-│   │   ├── user/                 # User service logic
-│   │   ├── product/              # Product service logic
-│   │   ├── cart/                 # Cart service logic
-│   │   ├── order/                # Order service logic
-│   │   ├── payment/              # Payment service logic
-│   │   ├── mail/                 # Mail service logic
-│   │   ├── kafka/                # Kafka producer/consumer utilities
-│   │   ├── db/                   # Database connection and models
-│   │   └── utils/                # Utility functions and helpers
-│   ├── package.json              # Node.js dependencies and scripts
-│   ├── tsconfig.json             # TypeScript configuration
-│   └── Dockerfile                # Dockerfile for Node.js services
+│   └── ...
 ├── front/                        # Frontend application (e.g., React, Angular, Vue.js)
 │   ├── src/
 │   └── ...
-├── docker-compose.yml            # Docker Compose configuration for all services
+├── devops/                       # Contains infrastructure configurations (e.g., Nginx, ELK Stack)
+│   ├── nginx/                    # Nginx configurations for API Gateway load balancing
+│   ├── elk/                      # ELK Stack configurations (Logstash pipelines, Kibana dashboards)
+│   └── ...
+├── docker-compose.yml            # Main Docker Compose configuration for all services and infrastructure
 ├── create-topics.sh              # Script to create Kafka topics
 ├── .gitignore                    # Git ignore file
 ├── README.markdown               # Project documentation
@@ -85,25 +84,25 @@ Follow these steps to get the e-commerce microservices system up and running usi
 First, clone the project repository to your local machine:
 
 ```shell
-git clone https://github.com/kientt265/-web2-e-commerce-microservices.git
-cd -web2-e-commerce-microservices
+git clone https://github.com/kientt265/-web2-e-commerce-microservices-monorepo.git
+cd -web2-e-commerce-microservices-monorepo
 ```
 
 ### 2. Build and Start the Services
 
-Navigate to the project root directory and use Docker Compose to build and start all defined services. This command will pull necessary images, build custom service images, and start all containers in detached mode.
+Navigate to the project root directory and use Docker Compose to build and start all defined services and infrastructure components. This command will pull necessary images, build custom service images, and start all containers in detached mode.
 
 ```shell
 docker-compose up --build -d
 ```
 
-*   `--build`: Rebuilds service images (e.g., for `back` and `front` services) from their respective Dockerfiles.
+*   `--build`: Rebuilds service images (e.g., for `back`, `front`, `api-gateway`, `logstash` services) from their respective Dockerfiles.
 *   `-d`: Runs containers in detached mode, allowing them to run in the background.
 
 This process will:
 
-*   Pull images for PostgreSQL, Kafka, Zookeeper, Elasticsearch, Redis, and Debezium.
-*   Build custom images for your Node.js/TypeScript and Python services.
+*   Pull images for PostgreSQL, Kafka, Zookeeper, Elasticsearch, Redis, Debezium, Nginx, Logstash, and Kibana.
+*   Build custom images for your Node.js/TypeScript and Python microservices, as well as any custom API Gateway or logging components.
 *   Start all containers and connect them via a Docker network.
 
 ### 3. Create Kafka Topics
@@ -114,17 +113,17 @@ After the services are up, you need to create the necessary Kafka topics for int
 ./create-topics.sh
 ```
 
-This script typically contains commands to create topics such as `product-events`, `order-events`, `payment-events`, `cart-events`, `mail-events` etc., which are crucial for the microservices to communicate effectively.
+This script typically contains commands to create topics such as `product-events`, `order-events`, `payment-events`, `cart-events`, `mail-events`, and potentially `log-events` if logs are streamed to Kafka before Logstash.
 
 ### 4. Verify Services
 
-To ensure all services are running correctly, you can check the status of your Docker containers:
+To ensure all services and infrastructure components are running correctly, you can check the status of your Docker containers:
 
 ```shell
 docker ps
 ```
 
-You should see a list of running containers, including those for PostgreSQL, Kafka, Zookeeper, Elasticsearch, Redis, Debezium, and your custom microservices (e.g., `user-service`, `product-service`, `cart-service`, `order-service`, `payment-service`, `search-service`, `mail-service`).
+You should see a list of running containers, including those for PostgreSQL, Kafka, Zookeeper, Elasticsearch, Redis, Debezium, Nginx, Logstash, Kibana, and your custom microservices (e.g., `user-service`, `product-service`, `cart-service`, `order-service`, `payment-service`, `search-service`, `mail-service`, `api-gateway`).
 
 To view logs for a specific service (e.g., `product-service`):
 
@@ -136,9 +135,9 @@ Replace `<container_name_or_id>` with the actual name or ID of the service conta
 
 ### 5. Access the Application
 
-Once all services are running, you can access the frontend application (if available) via your web browser, typically at `http://localhost:<frontend_port>`. Refer to your `docker-compose.yml` or frontend service configuration for the exact port.
+Once all services are running, you can access the frontend application (if available) via your web browser, typically at `http://localhost:<frontend_port>`. All API requests should now go through the Nginx Load Balancer and API Gateway, usually accessible at `http://localhost:<nginx_port>`.
 
-API endpoints for individual microservices will also be available, usually at `http://localhost:<service_port>`.
+Kibana dashboard for log visualization will typically be available at `http://localhost:5601`.
 
 ### 6. Stopping the Services
 
@@ -181,6 +180,7 @@ Kafka is central to the inter-service communication. Key topics include:
 *   `payment-events`: For payment-related events (e.g., payment successful, payment failed).
 *   `cart-events`: For shopping cart events (e.g., item added to cart, item removed from cart).
 *   `mail-events`: For events triggering email notifications (e.g., new order confirmation).
+*   `log-events`: (Optional) For streaming application logs to Logstash.
 
 These topics are created by the `create-topics.sh` script. You can inspect Kafka topics using Kafka command-line tools if needed.
 
@@ -200,6 +200,25 @@ The Payment Service integrates with VNPay, a popular payment gateway. This integ
 
 The Mail Service is responsible for sending email notifications to users. It listens for specific events on Kafka (e.g., `order-events` for new order confirmations) and uses SMTP to send out emails. This ensures users receive timely updates regarding their interactions with the e-commerce system.
 
+## ELK Stack for Centralized Logging
+
+The ELK Stack (Elasticsearch, Logstash, Kibana) is integrated for comprehensive log management and analysis:
+
+*   **Logstash:** Collects logs from all microservices, parses them, and transforms them into a structured format before sending them to Elasticsearch. It can receive logs directly or via Kafka (`log-events` topic).
+*   **Elasticsearch:** Stores and indexes the processed logs, making them searchable and analyzable in real-time.
+*   **Kibana:** Provides a powerful web interface for visualizing, exploring, and managing the logs stored in Elasticsearch. Custom dashboards can be created to monitor system health, identify issues, and gain insights into application behavior.
+
+This centralized logging solution significantly improves observability and simplifies troubleshooting in a distributed microservices environment.
+
+## API Gateway and Nginx Load Balancer
+
+To manage incoming requests and ensure high availability, the system employs an API Gateway fronted by an Nginx Load Balancer:
+
+*   **API Gateway:** Acts as a single entry point for all external clients. It handles request routing, composition, and protocol translation, abstracting the underlying microservices architecture from the clients. Multiple instances of the API Gateway can be deployed for redundancy.
+*   **Nginx Load Balancer:** Sits in front of the API Gateway instances, distributing incoming client requests evenly across them. This provides fault tolerance (if one API Gateway instance fails, Nginx routes traffic to others) and improves overall system performance by preventing any single gateway from becoming a bottleneck. Nginx also handles SSL termination and can provide basic security features.
+
+This setup ensures that the system is robust, scalable, and resilient to failures, providing a seamless experience for end-users.
+
 ## Contributing
 
 Contributions are welcome! If you'd like to contribute to this project, please follow these steps:
@@ -218,5 +237,4 @@ Contributions are welcome! If you'd like to contribute to this project, please f
 ## Acknowledgements
 
 (Optional: Acknowledge any libraries, tools, or individuals that have significantly contributed to the project.)
-
 
