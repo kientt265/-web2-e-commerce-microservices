@@ -359,21 +359,59 @@ services:
 
   api-gateway:
     build:
-      context: ./back/gateway
+      context: ./gateway
       dockerfile: Dockerfile
     ports:
-      - "80:80"
+      - "8081:80"
     environment:
       - PORT=80
     depends_on:
       - auth-service
       - chat-service
       - product-service
+      - order-service
+      - payment-service
+      - cart-service
 
     volumes:
-      - ./back/gateway/conf.d:/etc/nginx/conf.d
+      - ./gateway/conf.d:/etc/nginx/conf.d
     networks:
       - app-network
+
+  api-gateway-2:
+    build:
+      context: ./gateway2
+      dockerfile: Dockerfile
+    ports:
+      - "8082:80"
+    environment:
+      - PORT=80
+    depends_on:
+      - auth-service
+      - chat-service
+      - product-service
+      - order-service
+      - payment-service
+      - cart-service
+    volumes:
+      - ./gateway2/conf.d:/etc/nginx/nginx.conf
+    networks:
+      - app-network
+
+  gate-load-balancer:
+    build: 
+      context: ./devops/gate-loadbalancer
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - ./devops/gate-loadbalancer/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api-gateway
+      - api-gateway2
+    networks:
+      - app-network
+
 
   elk-elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
@@ -407,7 +445,7 @@ services:
     ports:
       - "5044:5044"
     volumes:
-      - ./elk/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./devops/elk/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
     depends_on:
       - elk-elasticsearch
     networks:
@@ -421,7 +459,7 @@ services:
     volumes:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./elk/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./devops/elk/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
     depends_on:
       - elk-logstash
     networks:

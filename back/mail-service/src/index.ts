@@ -1,4 +1,3 @@
-//TODO: 2 Cập nhật README. Thêm mail service
 //TODO: 3 Xong 2 TODO này thì viết tiếp E2EE cho chat-app
 //TODO: 4 Viết lại summary CV
 import {config} from 'dotenv';
