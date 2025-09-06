@@ -33,7 +33,7 @@ function Login() {
             };
             const response = await userService.login(loginData);
             setFormData({id: response.user_id, ...formData});
-            setAuth({ token: response.token, user: response.user });
+            setAuth({ token: response.accessToken, user: response.user });
             console.log('Login successful:', response.username);
             console.log('User ID:', response.user_id);
             navigate('/Chat', {
