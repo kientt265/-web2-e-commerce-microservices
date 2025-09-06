@@ -47,7 +47,7 @@ export const login = async (req: Request, res: Response) => {
     );
     res.cookie('rt', refreshToken, {
       httpOnly: true, secure: true, sameSite: 'lax',
-      path: '/refresh', maxAge: 30 * 24 * 60 * 60 * 1000,
+      path: '/api/auth/refresh', maxAge: 30 * 24 * 60 * 60 * 1000,
     });
     res.status(200).json({ accessToken, user_id: user.user_id, username: user.username });
 
