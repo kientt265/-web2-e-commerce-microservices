@@ -8,6 +8,27 @@ filebeat.inputs:
           when:
             equals:
               container.name: "redis-1"
+      - drop_event:
+          when:
+            and:
+              - or:
+                  - equals:
+                      container.name: "auth-db-1"
+                  - equals:
+                      container.name: "chat-db-1"
+                  - equals:
+                      container.name: "cart-db-1"
+                  - equals:
+                      container.name: "order-db-1"
+                  - equals:
+                      container.name: "payment-db-1"
+                  - equals:
+                      container.name: "mail-db-1"
+                  - equals:
+                      container.name: "product-db-1"
+              - not:
+                  contains:
+                    message: "ERROR"      
       - decode_json_fields:
           fields: ["message"]
           target: "json"
